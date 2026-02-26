@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: ResBuildIn_Metadata
+  m_EditorClassIdentifier: 
+  m_GroupName: ResBuildIn_Metadata
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 7d31d7ee5fe13b749a0206759975c261
+  m_SerializeEntries:
+  - m_GUID: 09b2c72895c1b8b45800ee30ac40cb2a
+    m_Address: Metadata/UnityEngine.CoreModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 20a04f19a018cf243af427d8d85ad5af
+    m_Address: Metadata/UnityEngine.AudioModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2321327bd37a15d4fa660ba51c5be827
+    m_Address: Metadata/UnityEngine.UIModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 262dfc1a6c0fe984791c1b74e4b88476
+    m_Address: Metadata/Unity.ResourceManager.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c45748829d1bf14dbe914f598d3c496
+    m_Address: Metadata/System.Core.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a29d20a32cd19e4eae10dcb6fcbba00
+    m_Address: Metadata/netstandard.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ace6bcf0c94255942ae7cd95e0154ed6
+    m_Address: Metadata/mscorlib.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cab510d52258a5448bf123409730413b
+    m_Address: Metadata/UnityEngine.TextRenderingModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e44bf25e0aa6ddf4cabd37b7f649f0fa
+    m_Address: Metadata/System.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6455937b39b69b418b02145b02d6bac
+    m_Address: Metadata/UnityEngine.UI.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff83ce25b7174584588bb33373d16675
+    m_Address: Metadata/Unity.Addressables.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d67d568ad744b7a43bd8810b4b3242d7, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2c00e4ef3a6858342a3b7bb848e0e88d, type: 2}

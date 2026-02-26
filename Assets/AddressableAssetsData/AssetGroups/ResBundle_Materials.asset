@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: ResBundle_Materials
+  m_EditorClassIdentifier: 
+  m_GroupName: ResBundle_Materials
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 04faf80967c44684faeffd603027ea44
+  m_SerializeEntries:
+  - m_GUID: 2576961420a5c294782358d7831376a4
+    m_Address: Materials/Alpha.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3c08682a95b556e41aeddc7010af4926
+    m_Address: Materials/Red.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 609fa39d73c26c34393ab4ddafb43e13
+    m_Address: Materials/Yelllow.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7adc1dbefe6d7ac4d8e6818704d7f2c6
+    m_Address: Materials/Black.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f734ccd98b9fb8448e5e3ef97294259
+    m_Address: Materials/Green.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b0535936eb78254488097e331d7d3dd
+    m_Address: Materials/Blue.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d67d568ad744b7a43bd8810b4b3242d7, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: abd8b600c5298b54386a46ff2012985a, type: 2}
