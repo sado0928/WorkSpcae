@@ -16,11 +16,10 @@
 /[Aa]ssets/[Ss]treaming[Aa]ssets/[Bb]undles/
 /[Ss]erver[Dd]ata/
 
-# --- HybridCLR (热更新) 相关 ---
-# 忽略生成的中间数据、IL2CPP 临时目录
-/[Hh]ybrid[Cc][Ll][Rr][Dd]ata/
-# 如果你希望在 Git 中保留某些特定配置，可以在下面添加排除规则
-# !/[Hh]ybrid[Cc][Ll][Rr][Dd]ata/SomeConfig/
+# --- HybridCLR ---
+/HybridCLRData/AssembliesPostIl2CppStrip
+/HybridCLRData/HotUpdateDlls
+/HybridCLRData/StrippedAOTDllsTempProj
 
 # --- IDE 配置文件 (Rider, VS, VSCode) ---
 .idea/
