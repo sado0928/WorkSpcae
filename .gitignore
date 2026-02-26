@@ -28,6 +28,7 @@
 .vscode/
 .gemini/
 .geminiignore
+GEMINI.md
 *.csproj
 *.unityproj
 *.sln
