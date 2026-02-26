@@ -8,7 +8,7 @@ namespace Game.Runtime.Hotfix
         
         protected override void OnInit()
         {
-            Global.LogError("哈哈哈哈哈哈我要成功了吗");
+            Global.LogError("进入主界面");
         }
         
         protected override void OnClose()
