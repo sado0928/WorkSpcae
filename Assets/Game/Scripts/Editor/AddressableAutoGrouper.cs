@@ -2,13 +2,14 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.IO;
+using Game.Runtime.AOT;
 using UnityEngine;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 
 public class AddressableAutoGrouper
 {
-    private const string ResBundlePath = "Assets/ResBundle";
-    private const string ResBuildInPath = "Assets/ResBuildIn";
+    private const string ResBundlePath = HotUpdateConsts.ResBundlePath;
+    private const string ResBuildInPath = HotUpdateConsts.ResBuildInPath;
 
     [MenuItem("FreamWork/Addressables/Auto Group ResBundle")]
     public static void AutoGroup()
@@ -24,7 +25,7 @@ public class AddressableAutoGrouper
 
         if (Directory.Exists(ResBundlePath))
         {
-            ProcessDirectoryRecursively(new DirectoryInfo(ResBundlePath), settings, ResBundlePath, "ResBundle_");
+            ProcessDirectoryRecursively(new DirectoryInfo(ResBundlePath), settings, ResBundlePath, HotUpdateConsts.GroupPrefixBundle);
         }
         else
         {
@@ -33,7 +34,7 @@ public class AddressableAutoGrouper
 
         if (Directory.Exists(ResBuildInPath))
         {
-            ProcessDirectoryRecursively(new DirectoryInfo(ResBuildInPath), settings, ResBuildInPath, "ResBuildIn_");
+            ProcessDirectoryRecursively(new DirectoryInfo(ResBuildInPath), settings, ResBuildInPath, HotUpdateConsts.GroupPrefixBuildIn);
         }
         else
         {
@@ -128,7 +129,7 @@ public class AddressableAutoGrouper
                     
                     AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group, false, false);
                     entry.address = address;
-                    entry.SetLabel("default", true, true);
+                    entry.SetLabel(HotUpdateConsts.LabelDefault, true, true);
                 }
             }
         }

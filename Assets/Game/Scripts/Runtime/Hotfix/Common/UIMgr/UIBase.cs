@@ -107,6 +107,8 @@ namespace Game.Runtime.Hotfix
         public void OnClose(float lastCloseTime)
         {
             LastCloseTime = lastCloseTime;
+            RemoveAllTimer();
+            RemoveAllFrameTimer();
             OnClose();
         }
 

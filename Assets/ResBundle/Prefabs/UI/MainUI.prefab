@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u4E3B\u754C\u9762"
+  m_text: MainUI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 68e7b74fdac6be74b965704c7d2d933a, type: 2}
   m_sharedMaterial: {fileID: -245541324455271140, guid: 68e7b74fdac6be74b965704c7d2d933a, type: 2}

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Game.Runtime.AOT;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Build;
@@ -337,7 +338,7 @@ namespace Game.Editor
             }
 
             // 扫描版本
-            var fileListFiles = Directory.GetFiles(serverDataPath, "filelist_*.json");
+            var fileListFiles = Directory.GetFiles(serverDataPath, $"{HotUpdateConsts.FileListPrefix}*.json");
             if (fileListFiles.Length == 0)
             {
                 GUILayout.Label("暂无历史版本记录。", EditorStyles.centeredGreyMiniLabel);
@@ -389,7 +390,7 @@ namespace Game.Editor
         private void CleanServerVersions(string serverRoot)
         {
             HashSet<string> keepBundles = new HashSet<string>();
-            var allFileListFiles = Directory.GetFiles(serverRoot, "filelist_*.json");
+            var allFileListFiles = Directory.GetFiles(serverRoot, $"{HotUpdateConsts.FileListPrefix}*.json");
             foreach (var fFile in allFileListFiles)
             {
                 string fileName = Path.GetFileName(fFile);
@@ -418,7 +419,7 @@ namespace Game.Editor
                 if (kv.Value) 
                 {
                     string ver = kv.Key;
-                    string lPath = Path.Combine(serverRoot, $"filelist_{ver}.json");
+                    string lPath = Path.Combine(serverRoot, string.Format(HotUpdateConsts.RemoteFileListName,ver));
                     if (File.Exists(lPath)) File.Delete(lPath);
                     deletedVersions.Add(ver);
                 }
@@ -435,7 +436,7 @@ namespace Game.Editor
                 }
             }
             
-            var allCatalogs = Directory.GetFiles(serverRoot, "catalog_*.*", SearchOption.AllDirectories);
+            var allCatalogs = Directory.GetFiles(serverRoot, $"{HotUpdateConsts.CatalogPrefix}*.*", SearchOption.AllDirectories);
             foreach(var cPath in allCatalogs)
             {
                 string relPath = cPath.Substring(serverRoot.Length + 1).Replace("\\", "/");
@@ -553,7 +554,7 @@ namespace Game.Editor
 
                 UpdateProgress("生成资源清单...", 0.8f);
                 // 关键修正：必须在 BuildPlayer 之前生成清单，否则 APK 内置的 version.txt 是旧的！
-                VersionFileMgr.GenerateFileListAndClean();
+                VersionFileTool.GenerateFileListAndClean();
 
                 UpdateProgress("构建终端 Player...", 0.9f);
                 BuildPlayer();
@@ -597,7 +598,7 @@ namespace Game.Editor
                 }
 
                 UpdateProgress("生成资源清单...", 0.9f);
-                VersionFileMgr.GenerateFileListAndClean();
+                VersionFileTool.GenerateFileListAndClean();
                 
                 Debug.Log($"<b>[GameBuilder]</b> 增量构建完成！耗时: {TimeSpan.FromTicks(DateTime.Now.Ticks - startTime).TotalSeconds:F1}s\n请检查 ServerData 目录。");
             }

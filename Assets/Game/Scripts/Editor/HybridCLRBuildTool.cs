@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Game.Runtime.AOT;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,8 +15,8 @@ namespace Game.Editor
         public static string HotfixDllSrcDir => HybridCLR.Editor.SettingsUtil.GetHotUpdateDllsOutputDirByTarget(EditorUserBuildSettings.activeBuildTarget);
         public static string AotDllSrcDir => HybridCLR.Editor.SettingsUtil.GetAssembliesPostIl2CppStripDir(EditorUserBuildSettings.activeBuildTarget);
         
-        public const string ResBundlePath = "Assets/ResBundle";
-        public const string ResBuildInPath = "Assets/ResBuildIn";
+        public const string ResBundlePath = HotUpdateConsts.ResBundlePath;
+        public const string ResBuildInPath = HotUpdateConsts.ResBuildInPath;
         public const string HotfixDstPath = ResBundlePath + "/Hotfix";
         public const string MetadataDstPath = ResBuildInPath + "/Metadata";
 

@@ -17,43 +17,6 @@ using UnityEngine.UI;
 namespace Game.Runtime.AOT
 {
     // ===================================================================================
-    // 数据结构 (保持引用兼容)
-    // ===================================================================================
-    [Serializable]
-    public class FileData { public string fileName; public string md5; public long size; }
-
-    [Serializable]
-    public class FileManifest
-    {
-        public string version;
-        public List<FileData> files = new List<FileData>();
-        [NonSerialized] private Dictionary<string, FileData> _lookup;
-        public Dictionary<string, FileData> Lookup {
-            get {
-                if (_lookup == null) {
-                    _lookup = new Dictionary<string, FileData>();
-                    foreach (var f in files) _lookup[f.fileName] = f;
-                }
-                return _lookup;
-            }
-        }
-    }
-
-    public struct SemVer
-    {
-        public int Major; public int Minor; public int Patch;
-        public static SemVer Parse(string version) {
-            SemVer sv = new SemVer();
-            if (string.IsNullOrEmpty(version)) return sv;
-            string[] parts = version.Split('.');
-            if (parts.Length >= 1) int.TryParse(parts[0], out sv.Major);
-            if (parts.Length >= 2) int.TryParse(parts[1], out sv.Minor);
-            if (parts.Length >= 3) int.TryParse(parts[2], out sv.Patch);
-            return sv;
-        }
-    }
-
-    // ===================================================================================
     // 热更新管理器 (开发者重构版：MD5 强校验与语义化驱动)
     // ===================================================================================
     public class HotUpdateMgr : MonoBehaviour
@@ -66,6 +29,8 @@ namespace Game.Runtime.AOT
         [Header("配置")]
         public string serverRoot = "http://localhost:8888/";
         public string hotfixAssemblyName = "Game.Runtime.Hotfix.dll";
+        public string gameEntryName = "Game.Runtime.Hotfix.GameEntry";
+        public string gameEntryStartFuncName = "StartGame";
 
         private string PlatformName => 
 #if UNITY_ANDROID
@@ -77,9 +42,9 @@ namespace Game.Runtime.AOT
 #endif
 
         private string RemoteUrl => $"{serverRoot}/{PlatformName}/";
-        private const string BundleDirName = "Bundles";
-        private const string FileListName = "filelist.json";
-        private const string VersionFileName = "version.txt";
+        private const string BundleDirName = HotUpdateConsts.BundleDirName;
+        private const string FileListName = HotUpdateConsts.FileListName;
+        private const string VersionFileName = HotUpdateConsts.VersionFileName;
 
         private string InnerPath => Path.Combine(Application.streamingAssetsPath, BundleDirName);
         private string OuterPath => 
@@ -94,7 +59,7 @@ namespace Game.Runtime.AOT
         // 外置资源快照
         private Dictionary<string, FileData> _outerFileLookup = new Dictionary<string, FileData>();
         private string _latestCatalogFilename;
-
+        private string _fullVersionTag;
         private void Start()
         {
             InitializeUI();
@@ -132,9 +97,9 @@ namespace Game.Runtime.AOT
         private IEnumerator ScanLocalAssets()
         {
             UpdateUI(0, "正在分析本地资源...");
+            // filelist
             string json = null;
             yield return RequestLocalText(Path.Combine(InnerPath, FileListName), res => json = res);
-            
             if (!string.IsNullOrEmpty(json))
             {
                 try {
@@ -142,9 +107,17 @@ namespace Game.Runtime.AOT
                     foreach (var f in manifest.files) _innerFileLookup[f.fileName] = f;
                 } catch { }
             }
+            // 版本号
+            string fullVersionTag = null;
+            yield return RequestLocalText(Path.Combine(InnerPath, VersionFileName), res => fullVersionTag = res?.Trim());
+            if (!string.IsNullOrEmpty(fullVersionTag))
+            {
+                _fullVersionTag = fullVersionTag;
+            }
+            // 包外路径
+            if (!Directory.Exists(OuterPath)) Directory.CreateDirectory(OuterPath);
             
             yield return RequestLocalText(Path.Combine(OuterPath, FileListName), res => json = res);
-            
             if (!string.IsNullOrEmpty(json))
             {
                 try {
@@ -152,6 +125,14 @@ namespace Game.Runtime.AOT
                     foreach (var f in manifest.files) _outerFileLookup[f.fileName] = f;
                 } catch { }
             }
+
+            yield return RequestLocalText(Path.Combine(OuterPath, VersionFileName), res => fullVersionTag = res?.Trim());
+            if (!string.IsNullOrEmpty(fullVersionTag))
+            {
+                _fullVersionTag = fullVersionTag;
+            }
+
+            UpdateVersionDisplay();
         }
         
         // ===================================================================================
@@ -172,22 +153,42 @@ namespace Game.Runtime.AOT
                 onComplete?.Invoke(true);
                 yield break;
             }
-
             // B. 差异化判定
+            string[] remoteParts = remoteVerTag.Split('_');
+            SemVer remoteSemVer = SemVer.Parse(remoteParts[0]);
+            
             string localVerPath = Path.Combine(OuterPath, VersionFileName);
             string localVerTag = File.Exists(localVerPath) ? File.ReadAllText(localVerPath).Trim() : "";
-
-            if (localVerTag == remoteVerTag)
+            
+            if (string.IsNullOrEmpty(localVerTag))
             {
-                Debug.Log("<color=green>[Boot]</color> 资源已是最新");
-                LocateLatestCatalogFromLocal();
-                onComplete?.Invoke(true);
-                yield break;
+                // 引擎版本号
+                SemVer appSemVer = SemVer.Parse(Application.version);
+                // 强制更新
+                if (remoteSemVer.Major > appSemVer.Major)
+                {
+                    Debug.Log("<color=yellow>[Boot]</color> 检测到重大版本更新，请前往下载最新版本包");
+                    onComplete?.Invoke(false); 
+                    yield break;
+                }
             }
-
-            // C. 执行下载序列
+            else
+            {
+                string[] localParts = localVerTag.Split('_');
+                SemVer localSemVer = SemVer.Parse(localParts[0]);
+              
+                // 强制更新
+                if (remoteSemVer.Major > localSemVer.Major)
+                {
+                    Debug.Log("<color=yellow>[Boot]</color> 检测到重大版本更新，请前往下载最新版本包");
+                    onComplete?.Invoke(false); 
+                    yield break;
+                }
+            }
+            
+            // C. 获取远端资源清单
             string verStr = remoteVerTag.Split('_')[0];
-            string remoteManifestUrl = RemoteUrl + $"filelist_{verStr}.json";
+            string remoteManifestUrl = RemoteUrl + string.Format(HotUpdateConsts.RemoteFileListName,verStr);
             string remoteJson = null;
             yield return RequestRemoteText(remoteManifestUrl, res => remoteJson = res);
 
@@ -200,8 +201,12 @@ namespace Game.Runtime.AOT
                 File.WriteAllText(Path.Combine(OuterPath, FileListName), remoteJson);
                 File.WriteAllText(localVerPath, remoteVerTag);
                 LocateLatestCatalogFromLocal();
+                
+                // E. 同步版本号
+                _fullVersionTag = remoteVerTag;
+                UpdateVersionDisplay();
             }
-
+            
             onComplete?.Invoke(true);
         }
 
@@ -218,18 +223,41 @@ namespace Game.Runtime.AOT
                 {
                     string platformKey = $"/{PlatformName}/";
                     int idx = location.InternalId.LastIndexOf(platformKey);
-                    string relativePath = idx >= 0 ? location.InternalId.Substring(idx + platformKey.Length) : Path.GetFileName(location.InternalId);
+                    // 提取相对路径（如 Hotfix/Game.Runtime.Hotfix.dll.bytes）
+                    string relativePath = idx >= 0 
+                        ? location.InternalId.Substring(idx + platformKey.Length) 
+                        : Path.GetFileName(location.InternalId);
 
+                    // 1. 优先检查沙盒路径（PersistentDataPath）
                     string sandBoxPath = Path.Combine(OuterPath, relativePath);
-                    if (File.Exists(sandBoxPath)) return "file:////" + sandBoxPath;
+                    sandBoxPath = sandBoxPath.Replace("\\", "/"); // 统一分隔符为 /
+                    if (File.Exists(sandBoxPath))
+                    {
+                        // 安卓沙盒文件用 file:/// 前缀（沙盒是本地可读写目录，支持该协议）
+                        return "file:///" + sandBoxPath;
+                    }
 
+                    // 2. 沙盒无则检查首包 StreamingAssets
                     if (_innerFileLookup.ContainsKey(relativePath))
                     {
                         string innerPath = Path.Combine(InnerPath, relativePath);
-                        if (Application.platform != RuntimePlatform.Android) innerPath = "file:////" + innerPath;
+                        innerPath = innerPath.Replace("\\", "/"); // 统一分隔符
+
+                        // 安卓专属：StreamingAssets 必须用 jar:file 协议
+                        if (Application.platform == RuntimePlatform.Android)
+                        {
+                            // 拼接安卓 StreamingAssets 标准路径：jar:file:///应用APK路径!/assets/相对路径
+                            innerPath = $"jar:file://{Application.dataPath}!/assets/{BundleDirName}/{relativePath}";
+                        }
+                        else
+                        {
+                            // 其他平台（Windows/iOS/macOS）用 file:/// 前缀
+                            innerPath = "file:///" + innerPath;
+                        }
                         return innerPath;
                     }
                 }
+                // 非远程地址，返回原 InternalId
                 return location.InternalId;
             };
 
@@ -290,17 +318,28 @@ namespace Game.Runtime.AOT
 
             foreach (var rf in remoteManifest.files)
             {
+                bool isCatalogFile = rf.fileName.StartsWith(HotUpdateConsts.CatalogPrefix);
                 bool isNotInOuter = !_outerFileLookup.TryGetValue(rf.fileName, out var outerF) || outerF.md5 != rf.md5;
                 bool isNotInInner = !_innerFileLookup.TryGetValue(rf.fileName, out var interF) || interF.md5 != rf.md5;
-
-                if (isNotInOuter && isNotInInner) {
+                // catalog文件必须包内都包外存在
+                if (isCatalogFile && isNotInOuter)
+                {
+                    downloadList.Add(rf);
+                    totalSize += rf.size;
+                }
+                else if (isNotInOuter && isNotInInner) 
+                {
                     downloadList.Add(rf);
                     totalSize += rf.size;
                 }
             }
 
-            if (downloadList.Count == 0) yield break;
-
+            if (downloadList.Count == 0)
+            {
+                Debug.Log("<color=green>[Boot]</color> 资源已是最新");
+                yield break;
+            }
+            
             long finishedSize = 0;
             foreach (var file in downloadList)
             {
@@ -309,12 +348,13 @@ namespace Game.Runtime.AOT
                     www.downloadHandler = new DownloadHandlerFile(tempPath);
                     yield return www.SendWebRequest();
 
-                    if (www.result == UnityWebRequest.Result.Success && GetFileMD5(tempPath) == file.md5) {
+                    if (www.result == UnityWebRequest.Result.Success && HotUpdateUtils.GetFileMD5(tempPath) == file.md5) {
                         string dest = Path.Combine(OuterPath, file.fileName);
                         if (File.Exists(dest)) File.Delete(dest);
                         File.Move(tempPath, dest);
                         finishedSize += file.size;
-                        UpdateUI((float)finishedSize / totalSize, $"更新资源: {file.fileName}", true);
+                        Debug.Log($"[HotUpdateManager] 更新资源文件: {file.fileName}");
+                        UpdateUI((float)finishedSize / totalSize, $"更新资源中...", true);
                     }
                 }
             }
@@ -325,7 +365,11 @@ namespace Game.Runtime.AOT
             if (!Directory.Exists(OuterPath)) yield break;
             try
             {
-                var allLocalFiles = Directory.GetFiles(OuterPath, "*.*", SearchOption.AllDirectories);
+                IEnumerable<string> allLocalFiles = Directory.EnumerateFiles(
+                    OuterPath, 
+                    "*", // 替代 *.*，适配安卓/iOS 文件匹配规则
+                    SearchOption.AllDirectories
+                );
                 foreach (var filePath in allLocalFiles)
                 {
                     string fileName = Path.GetFileName(filePath);
@@ -337,7 +381,6 @@ namespace Game.Runtime.AOT
                         File.Delete(filePath);
                     }
                 }
-               
             }
             catch (Exception e)
             {
@@ -352,7 +395,7 @@ namespace Game.Runtime.AOT
             try {
                 var manifest = JsonUtility.FromJson<FileManifest>(File.ReadAllText(localListPath));
                 foreach (var f in manifest.files) {
-                    if (f.fileName.StartsWith("catalog_") && f.fileName.EndsWith(".json")) {
+                    if (f.fileName.StartsWith(HotUpdateConsts.CatalogPrefix) && f.fileName.EndsWith(".json")) {
                         _latestCatalogFilename = f.fileName;
                         break;
                     }
@@ -365,8 +408,8 @@ namespace Game.Runtime.AOT
             UpdateUI(1f, "准备就绪...");
             try {
                 string assemblyName = hotfixAssemblyName.Replace(".dll", "");
-                string typeName = $"Game.Runtime.Hotfix.GameEntry, {assemblyName}";
-                Type.GetType(typeName)?.GetMethod("StartGame")?.Invoke(null, null);
+                string typeName = $"{gameEntryName}, {assemblyName}";
+                Type.GetType(typeName)?.GetMethod(gameEntryStartFuncName)?.Invoke(null, null);
             } catch (Exception e) { Debug.LogError($"[Boot] 启动失败: {e.Message}"); }
         }
 
@@ -388,19 +431,17 @@ namespace Game.Runtime.AOT
             if (!progressSlider) progressSlider = GameObject.Find("Progress_Slider")?.GetComponent<Slider>();
             if (!infoText) infoText = GameObject.Find("Loading_Info_Text")?.GetComponent<TextMeshProUGUI>();
             if (progressSlider) progressSlider.gameObject.SetActive(false);
-            UpdateVersionDisplay();
+            if (!versionText) versionText = GameObject.Find("Version_Text")?.GetComponent<TextMeshProUGUI>();
+            if (versionText) versionText.gameObject.SetActive(false);
         }
 
         // 获取版本号
         private void UpdateVersionDisplay()
         {
-            if (!versionText) versionText = GameObject.Find("Version_Text")?.GetComponent<TextMeshProUGUI>();
             if (versionText)
             {
                 string resVersion = "";
-                string innerVerPath = Path.Combine(InnerPath, VersionFileName);
-                string outerVerPath = Path.Combine(OuterPath, VersionFileName);
-                string fullVersion = File.Exists(outerVerPath) ? File.ReadAllText(outerVerPath).Trim() : File.ReadAllText(innerVerPath).Trim();
+                string fullVersion = _fullVersionTag;
                 if (fullVersion.Contains("_"))
                 {
                     string[] parts = fullVersion.Split('_');
@@ -413,31 +454,14 @@ namespace Game.Runtime.AOT
                 {
                     resVersion = fullVersion.Length > 6 ? fullVersion.Substring(fullVersion.Length - 6) : fullVersion;
                 }
-                versionText.text = $"App:v{Application.version} Res:{resVersion}";
+                versionText.text = $"App:v{resVersion}";
+                versionText.gameObject.SetActive(true);
             }
         }
 
         // ===================================================================================
-        // MD5 及 IO 基础工具
+        // IO 方法
         // ===================================================================================
-        
-        private static string GetFileMD5(string filePath)
-        {
-            try
-            {
-                using (var md5 = MD5.Create())
-                {
-                    using (var stream = File.OpenRead(filePath))
-                    {
-                        byte[] hash = md5.ComputeHash(stream);
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < hash.Length; i++) sb.Append(hash[i].ToString("x2"));
-                        return sb.ToString();
-                    }
-                }
-            }
-            catch { return ""; }
-        }
         
         private IEnumerator RequestLocalText(string path, Action<string> onResult)
         {
