@@ -7,6 +7,7 @@ namespace Game.Runtime.Hotfix
         public override void OnEnter()
         {
             Global.gApp.gUIMgr.OpenUIAsync(UIDefine.MainUI);
+            Global.gApp.gAudioMgr.PlayBGM(AudioDefine.MainBgm,false);
         }
 
         public override void OnUpdate(float dt)
@@ -17,6 +18,7 @@ namespace Game.Runtime.Hotfix
         public override void OnLeave()
         {
             Global.gApp.gUIMgr.Close(UIDefine.MainUI);
+            Global.gApp.gAudioMgr.StopBGM();
         }
 
         public override void OnDestroy()

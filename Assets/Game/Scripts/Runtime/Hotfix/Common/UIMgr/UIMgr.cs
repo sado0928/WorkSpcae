@@ -11,16 +11,18 @@ namespace Game.Runtime.Hotfix
     /// </summary>
     public class UIMgr:IUpdate
     {
+        private App m_App;
+
         private Transform m_UIRoot;
         
         // 资源缓存: Key -> Prefab (只存资源，不存实例)
         private Dictionary<string, GameObject> m_ResCache = new Dictionary<string, GameObject>();
         
         // 活动 UI 缓存: Key -> UIBase (当前正在打开的实例)
-        private Dictionary<string, UIBase> m_ActiveCache = new Dictionary<string, UIBase>();
+        private Dictionary<string, UIBase> m_OpenUIDic = new Dictionary<string, UIBase>();
         
         // --- UI 栈管理 (存储当前 Active 的 UI，按打开顺序排序，最末尾为最顶层) ---
-        private List<UIBase> m_ActiveStack = new List<UIBase>();
+        private List<UIBase> m_OpenUIList = new List<UIBase>();
         
         // 层级根节点管理: Layer -> Transform
         private Dictionary<UILayer, Transform> m_LayerRoots = new Dictionary<UILayer, Transform>();
@@ -28,9 +30,8 @@ namespace Game.Runtime.Hotfix
         // 关闭时间记录: Key -> Time (用于 LRU 资源释放)
         private Dictionary<string, float> m_LastCloseTime = new Dictionary<string, float>();
         
-        // 正在加载中的 UI (防止短时间内重复 Open 导致重复加载)
-        // Key: UI Key
-        private HashSet<string> m_LoadingSet = new HashSet<string>();
+        // 正在加载中的 UI: Key: UI Key (防止短时间内重复 Open 导致重复加载)
+        private HashSet<string> m_LoadingUISet = new HashSet<string>();
         
         // 层级基准 Order
         private Dictionary<UILayer, int> m_LayerBaseOrder = new Dictionary<UILayer, int>()
@@ -57,7 +58,6 @@ namespace Game.Runtime.Hotfix
         private bool m_IsQueueRunning = false;
 
         // --- 防止按钮多点打开相关 ---
-        // Flag -> 占用的 UI Key
         private List<string> m_OpenFlags = new List<string>();
         
         // --- 卸载资源
@@ -66,14 +66,16 @@ namespace Game.Runtime.Hotfix
         private float m_AutoReleaseResTimeLeft = 60f;//自动卸载 计时器
         public void Init(Transform keepNode)
         {
+            m_App = Global.gApp;
+
             // 1. 获取 RootCanvas 和 UICamera
-            m_RootCanvas = Global.gApp.gCanvas;
+            m_RootCanvas = m_App.gCanvas;
             if (m_RootCanvas == null)
             {
                 Debug.LogError("[UIMgr] KeepNode must have a Canvas component for reference!");
             }
             
-            m_UICamera = Global.gApp.gUICamera;
+            m_UICamera = m_App.gUICamera;
             if (m_UICamera == null)
             {
                 // 如果 KeepNode 没有相机，尝试找 MainCamera
@@ -128,15 +130,15 @@ namespace Game.Runtime.Hotfix
         {
             if (layer == null)
             {
-                return m_ActiveStack.Count > 0 ? m_ActiveStack.Last() : null;
+                return m_OpenUIList.Count > 0 ? m_OpenUIList.Last() : null;
             }
 
             // 从栈顶向下查找，第一个符合层级的 UI 即为该层级的最顶层
-            for (int i = m_ActiveStack.Count - 1; i >= 0; i--)
+            for (int i = m_OpenUIList.Count - 1; i >= 0; i--)
             {
-                if (m_ActiveStack[i].Config.Layer == layer.Value)
+                if (m_OpenUIList[i].Config.Layer == layer.Value)
                 {
-                    return m_ActiveStack[i];
+                    return m_OpenUIList[i];
                 }
             }
             return null;
@@ -149,7 +151,7 @@ namespace Game.Runtime.Hotfix
         /// <returns>true 表示已打开且可见</returns>
         public bool IsOpen(string key)
         {
-            return m_ActiveCache.ContainsKey(key);
+            return m_OpenUIDic.ContainsKey(key);
         }
 
         /// <summary>
@@ -160,7 +162,7 @@ namespace Game.Runtime.Hotfix
         /// <returns>UI 实例，如果未打开则返回 null</returns>
         public T GetUI<T>(string key) where T : UIBase
         {
-            if (m_ActiveCache.TryGetValue(key, out UIBase ui))
+            if (m_OpenUIDic.TryGetValue(key, out UIBase ui))
             {
                 return ui as T;
             }
@@ -175,9 +177,9 @@ namespace Game.Runtime.Hotfix
         public List<UIBase> GetOpenUIs(UILayer? layer = null)
         {
             List<UIBase> result = new List<UIBase>();
-            for (int i = 0; i < m_ActiveStack.Count; i++)
+            for (int i = 0; i < m_OpenUIList.Count; i++)
             {
-                var ui = m_ActiveStack[i];
+                var ui = m_OpenUIList[i];
                 if (ui != null)
                 {
                     if (layer == null || ui.Config.Layer == layer.Value)
@@ -319,22 +321,22 @@ namespace Game.Runtime.Hotfix
             }
 
             // 1. 检查是否已经打开 (Active)
-            if (m_ActiveCache.TryGetValue(key, out UIBase activeUI))
+            if (m_OpenUIDic.TryGetValue(key, out UIBase activeUI))
             {
                 // 如果已经打开，将其挪到最上层 (Stack 逻辑)
-                if (m_ActiveStack.Contains(activeUI)) m_ActiveStack.Remove(activeUI);
+                if (m_OpenUIList.Contains(activeUI)) m_OpenUIList.Remove(activeUI);
                 
                 // 重新计算 Sorting (基于当前其他 UI)
                 SetupUIState(activeUI, config);
                 
-                m_ActiveStack.Add(activeUI);
+                m_OpenUIList.Add(activeUI);
                 
                 onComplete?.Invoke(activeUI);
                 return;
             }
 
             // 2. 检查是否正在加载中 (防并发)
-            if (m_LoadingSet.Contains(key))
+            if (m_LoadingUISet.Contains(key))
             {
                 Debug.LogWarning($"[UIMgr] UI {key} is already loading. Ignored duplicate request.");
                 return;
@@ -354,7 +356,7 @@ namespace Game.Runtime.Hotfix
                     }
 
                     // 实例化
-                    instantiatedGO = Global.gApp.gResMgr.Instantiate(prefab, parent);
+                    instantiatedGO = m_App.gResMgr.Instantiate(prefab, parent);
                     instantiatedGO.name = key;
 
                     // 获取/挂载脚本
@@ -378,8 +380,8 @@ namespace Game.Runtime.Hotfix
                     script.OnInit(key, config);
 
                     // 加入 Active 缓存和栈
-                    m_ActiveCache.Add(key, script);
-                    m_ActiveStack.Add(script);
+                    m_OpenUIDic.Add(key, script);
+                    m_OpenUIList.Add(script);
                     
                     // 移除上一轮的关闭时间记录 (如果存在)，因为它现在活过来了
                     if (m_LastCloseTime.ContainsKey(key)) m_LastCloseTime.Remove(key);
@@ -391,7 +393,7 @@ namespace Game.Runtime.Hotfix
                     Debug.LogError($"[UIMgr] Critical exception during UI Open ({key}): {e}");
                     if (instantiatedGO != null)
                     {
-                        Global.gApp.gResMgr.Destroy(instantiatedGO);
+                        m_App.gResMgr.Destroy(instantiatedGO);
                     }
                     onComplete?.Invoke(null);
                 }
@@ -414,10 +416,10 @@ namespace Game.Runtime.Hotfix
             }
 
             // 4. 异步加载资源
-            m_LoadingSet.Add(key);
-            Global.gApp.gResMgr.LoadPrefabAsync(config.Path, (prefab) =>
+            m_LoadingUISet.Add(key);
+            m_App.gResMgr.LoadPrefabAsync(config.Path, (prefab) =>
             {
-                m_LoadingSet.Remove(key);
+                m_LoadingUISet.Remove(key);
 
                 if (prefab == null)
                 {
@@ -470,14 +472,14 @@ namespace Game.Runtime.Hotfix
 
         public void Close(string key)
         {
-            if (m_ActiveCache.TryGetValue(key, out UIBase ui))
+            if (m_OpenUIDic.TryGetValue(key, out UIBase ui))
             {
                 var lastCloseTime = Time.realtimeSinceStartup;
                 // 1. 生命周期
                 ui.OnClose(lastCloseTime);
                 
                 // 2. 维护 UI 栈：从栈中移除
-                if (m_ActiveStack.Contains(ui)) m_ActiveStack.Remove(ui);
+                if (m_OpenUIList.Contains(ui)) m_OpenUIList.Remove(ui);
 
                 // 3. 记录关闭时间 (用于 LRU 释放资源)
                 // 只有当配置了非 KeepCached 时才记录，KeepCached 的永远不记录时间（免死金牌）
@@ -487,10 +489,10 @@ namespace Game.Runtime.Hotfix
                 }
 
                 // 4. 销毁实例
-                Global.gApp.gResMgr.Destroy(ui.gameObject);
+                m_App.gResMgr.Destroy(ui.gameObject);
                 
                 // 5. 移除活动缓存
-                m_ActiveCache.Remove(key);
+                m_OpenUIDic.Remove(key);
                 
             }
         }
@@ -502,10 +504,10 @@ namespace Game.Runtime.Hotfix
         public void CloseAll(UILayer? keepLayer = null)
         {
             // 复制 Keys 列表防止修改集合报错
-            var keys = new List<string>(m_ActiveCache.Keys);
+            var keys = new List<string>(m_OpenUIDic.Keys);
             foreach (var key in keys)
             {
-                if (m_ActiveCache.TryGetValue(key, out UIBase ui))
+                if (m_OpenUIDic.TryGetValue(key, out UIBase ui))
                 {
                     // 如果指定了保留层级，且当前 UI 属于该层级，则跳过
                     if (keepLayer.HasValue && ui.Config.Layer == keepLayer.Value)
@@ -521,7 +523,7 @@ namespace Game.Runtime.Hotfix
             {
                 m_OpenFlags.Clear();
                 m_OpenQueue.Clear();
-                m_ActiveStack.Clear();
+                m_OpenUIList.Clear();
                 m_IsQueueRunning = false;
             }
         }
@@ -540,7 +542,7 @@ namespace Game.Runtime.Hotfix
             foreach (var key in m_ResCache.Keys)
             {
                 // 如果当前正在使用 (Active)，则跳过
-                if (m_ActiveCache.ContainsKey(key)) continue;
+                if (m_OpenUIDic.ContainsKey(key)) continue;
                 
                 // 检查是否有关闭时间记录 (KeepCached 的没有记录，所以通过 ContainsKey 自动过滤)
                 // 如果是刚 Close 的，m_LastCloseTime 应该有记录
@@ -553,7 +555,7 @@ namespace Game.Runtime.Hotfix
                         if (config != null)
                         {
                             // 2. 告诉 ResMgr 卸载资源
-                            Global.gApp.gResMgr.UnloadAsset(config.Path);
+                            m_App.gResMgr.UnloadAsset(config.Path);
                         }
                         
                         // 3. 记录 Key 待移除
@@ -574,7 +576,7 @@ namespace Game.Runtime.Hotfix
         
         public void OnIUpdate(float dt)
         {
-            if (Global.gApp.gResMgr.CurrentTypeBySceneType is ResTypeByScene.Global)
+            if (m_App.gResMgr.CurrentTypeBySceneType is ResTypeByScene.Global)
             {
                 m_AutoReleaseResTime += dt;
                 if (m_AutoReleaseResTime >= m_AutoReleaseResTimeLeft)

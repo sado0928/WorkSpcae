@@ -10,6 +10,8 @@
   </assembly>
   <assembly fullname="UnityEngine.AudioModule">
     <type fullname="UnityEngine.AudioClip" preserve="all" />
+    <type fullname="UnityEngine.AudioListener" preserve="all" />
+    <type fullname="UnityEngine.AudioSource" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.CoreModule">
     <type fullname="UnityEngine.Application" preserve="all" />
@@ -23,8 +25,11 @@
     <type fullname="UnityEngine.Events.UnityEvent" preserve="all" />
     <type fullname="UnityEngine.GameObject" preserve="all" />
     <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.Mathf" preserve="all" />
     <type fullname="UnityEngine.MonoBehaviour" preserve="all" />
     <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.PlayerPrefs" preserve="all" />
+    <type fullname="UnityEngine.Quaternion" preserve="all" />
     <type fullname="UnityEngine.RectTransform" preserve="all" />
     <type fullname="UnityEngine.Resources" preserve="all" />
     <type fullname="UnityEngine.SceneManagement.LoadSceneMode" preserve="all" />
@@ -34,6 +39,7 @@
     <type fullname="UnityEngine.Transform" preserve="all" />
     <type fullname="UnityEngine.U2D.SpriteAtlas" preserve="all" />
     <type fullname="UnityEngine.Vector2" preserve="all" />
+    <type fullname="UnityEngine.Vector3" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.TextRenderingModule">
     <type fullname="UnityEngine.Font" preserve="all" />

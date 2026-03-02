@@ -186,7 +186,7 @@ namespace Game.Runtime.Hotfix
         }
 
         /// <summary>
-        /// 手动卸载指定资源
+        /// 手动卸载指定资源 非底层禁止调用
         /// </summary>
         public void UnloadAsset(string path, ResTypeByScene? scope = null)
         {
@@ -251,34 +251,7 @@ namespace Game.Runtime.Hotfix
                 }
             };
         }
-
-        /// <summary>
-        /// 切换场景逻辑
-        /// 1. 清理上一个场景的资源（如果是从非 Global 切走）
-        /// 2. 加载新场景
-        /// </summary>
-        /// <param name="scenePath">场景资源路径</param>
-        /// <param name="newSceneType">新场景的资源域类型</param>
-        public void LoadScene(string scenePath, ResTypeByScene newSceneType)
-        {
-            // 如果当前场景类型不是 Global，且发生了类型变化，清理旧资源
-            // 例如：Level1 -> Level2，清理 Level1
-            // 例如：Global -> Level1，不清理 Global
-            if (CurrentTypeBySceneType != ResTypeByScene.Global && CurrentTypeBySceneType != newSceneType)
-            {
-                ClearSceneRes(CurrentTypeBySceneType);
-            }
-
-            CurrentTypeBySceneType = newSceneType;
-
-            string address = GetAddress(scenePath, ResType.Scenes);
-            // Single 模式加载场景
-            Addressables.LoadSceneAsync(address, UnityEngine.SceneManagement.LoadSceneMode.Single).WaitForCompletion();
-            
-            // 建议：切场景后手动 GC
-            UnLoadAssets();
-        }
-
+        
         /// <summary>
         /// 清理指定资源域的所有资源
         /// </summary>

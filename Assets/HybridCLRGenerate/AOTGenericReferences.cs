@@ -226,6 +226,7 @@ public class AOTGenericReferences : UnityEngine.MonoBehaviour
 		// object UnityEngine.GameObject.AddComponent<object>()
 		// object UnityEngine.GameObject.GetComponent<object>()
 		// object[] UnityEngine.GameObject.GetComponentsInChildren<object>(bool)
+		// object[] UnityEngine.Object.FindObjectsOfType<object>()
 		// object UnityEngine.Object.Instantiate<object>(object,UnityEngine.Transform)
 		// object UnityEngine.Object.Instantiate<object>(object,UnityEngine.Transform,bool)
 		// UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<object> UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle.Convert<object>()
@@ -235,5 +236,6 @@ public class AOTGenericReferences : UnityEngine.MonoBehaviour
 		// object UnityEngine.ResourceManagement.ResourceManager.CreateOperation<object>(System.Type,int,UnityEngine.ResourceManagement.Util.IOperationCacheKey,System.Action<UnityEngine.ResourceManagement.AsyncOperations.IAsyncOperation>)
 		// UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<object> UnityEngine.ResourceManagement.ResourceManager.ProvideResource<object>(UnityEngine.ResourceManagement.ResourceLocations.IResourceLocation)
 		// UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<object> UnityEngine.ResourceManagement.ResourceManager.StartOperation<object>(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationBase<object>,UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle)
+		// object[] UnityEngine.Resources.ConvertObjects<object>(UnityEngine.Object[])
 	}
 }

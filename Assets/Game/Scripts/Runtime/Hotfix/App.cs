@@ -13,8 +13,10 @@ namespace Game.Runtime.Hotfix
         public ResMgr gResMgr { get;private set; }
         public TimerMgr gTimerMgr { get;private set; }
         public FrameTimerMgr gFrameTimerMgr { get;private set; }
+        public AudioMgr gAudioMgr { get; private set; }
         public UIMgr gUIMgr { get;private set; }
         public ProcedureMgr gProcedureMgr { get;private set; }
+     
 
         public void OnAwake(Global global)
         {
@@ -32,6 +34,10 @@ namespace Game.Runtime.Hotfix
             gTimerMgr = new TimerMgr();
             gFrameTimerMgr = new FrameTimerMgr();
             
+            // 初始化音频管理器
+            gAudioMgr = new AudioMgr();
+            gAudioMgr.Init(m_KeepNode);
+
             // 初始化 UI 管理器并挂载 UIRoot 到 KeepNode
             gUIMgr = new UIMgr();
             gUIMgr.Init(m_KeepNode);
@@ -55,6 +61,10 @@ namespace Game.Runtime.Hotfix
             {
                 gFrameTimerMgr.OnTimerMapIUpdate(dt);
             }
+            if (gAudioMgr != null)
+            {
+                gAudioMgr.OnIUpdate(dt);
+            }
             if (gUIMgr != null)
             {
                 gUIMgr.OnIUpdate(dt);
@@ -67,6 +77,7 @@ namespace Game.Runtime.Hotfix
 
         public void OnDestroy()
         {
+            if (gAudioMgr != null) gAudioMgr.OnDestroy();
             if (gProcedureMgr != null) gProcedureMgr.OnDestroy();
             if (gResMgr != null) gResMgr.OnDestroy();
         }
