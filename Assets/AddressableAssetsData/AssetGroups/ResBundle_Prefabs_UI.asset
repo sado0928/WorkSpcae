@@ -23,8 +23,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18276582e951f274ea08efe90b2d6294
+    m_Address: Prefabs/UI/HeadUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 29c50863b501b524aa87b862cc59699b
     m_Address: Prefabs/UI/MainUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae735b883ec8cfb4d94a05e2baf101e0
+    m_Address: Prefabs/UI/BagUI.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - default

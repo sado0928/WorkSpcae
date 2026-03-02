@@ -81,13 +81,17 @@ namespace Game.Runtime.Hotfix
     {
         public static string LoadingUI = "LoadingUI";
         public static string MainUI = "MainUI";
+        public static string HeadUI = "HeadUI";
+        public static string BagUI = "BagUI";
 
         #region 配置字典
 
         public static Dictionary<string, UIConfig> UIInfo = new Dictionary<string, UIConfig>()
         {
-            {LoadingUI,new UIConfig(){Path ="Prefabs/UI/LoadingUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
-            {MainUI,new UIConfig(){Path ="Prefabs/UI/MainUI",Layer = UILayer.Main, ResTypeByScene = ResTypeByScene.Global}}
+            {LoadingUI,new UIConfig(){Path ="Prefabs/UI/LoadingUI",Layer = UILayer.System, ResTypeByScene = ResTypeByScene.Global}},
+            {MainUI,new UIConfig(){Path ="Prefabs/UI/MainUI",Layer = UILayer.Main, ResTypeByScene = ResTypeByScene.Global}},
+            {HeadUI,new UIConfig(){Path ="Prefabs/UI/HeadUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {BagUI,new UIConfig(){Path ="Prefabs/UI/BagUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
         };
 
         #endregion

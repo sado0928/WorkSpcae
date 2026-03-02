@@ -33,6 +33,20 @@ namespace Game.Runtime.Hotfix
             {
                 gApp.OnIUpdate(dtTime);
             }        
+            
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                gApp.gUIMgr.CloseAll();
+            }
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                gApp.gUIMgr.LoadUIAsync<HeadUI>(UIDefine.HeadUI);
+            }
+            if (Input.GetKeyDown(KeyCode.F2))
+            {
+                gApp.gUIMgr.LoadUIAsync<BagUI>(UIDefine.BagUI);
+
+            }
         }
     
         private void OnDestroy()

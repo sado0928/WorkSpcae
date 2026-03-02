@@ -220,6 +220,7 @@ namespace Game.Runtime.Hotfix
             {
                 if (obj != null) Addressables.Release(obj);
                 m_CacheDic[scope].Remove(path);
+                Global.LogEditor($"卸载资源{obj.name}");
                 return true;
             }
             return false;

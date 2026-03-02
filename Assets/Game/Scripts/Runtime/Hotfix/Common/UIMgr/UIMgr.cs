@@ -53,12 +53,12 @@ namespace Game.Runtime.Hotfix
         public Canvas m_RootCanvas { get; private set; }
         public Camera m_UICamera { get; private set; }
 
-        // --- 队列加载相关 ---
-        private Queue<Action> m_OpenQueue = new Queue<Action>();
-        private bool m_IsQueueRunning = false;
+        // --- 托管队列加载相关 ---
+        private Queue<Action> m_OpenHostingQueue = new Queue<Action>();
+        private bool m_IsHostingRunning = false;
 
-        // --- 防止按钮多点打开相关 ---
-        private List<string> m_OpenFlags = new List<string>();
+        // --- 拦截重复请求的标志位 ---
+        private bool m_IsLoading;
         
         // --- 卸载资源
         private float m_AutoReleaseResTime = 0;
@@ -198,9 +198,6 @@ namespace Game.Runtime.Hotfix
         /// <summary>
         /// 异步打开 UI (泛型版本)
         /// </summary>
-        /// <typeparam name="T">UI 脚本类型</typeparam>
-        /// <param name="key">UIDefine 中定义的 UI Key</param>
-        /// <returns>UIHandle 句柄</returns>
         public UIHandle<T> OpenUIAsync<T>(string key) where T : UIBase
         {
             UIHandle<T> handle = new UIHandle<T>();
@@ -212,33 +209,31 @@ namespace Game.Runtime.Hotfix
         }
 
         /// <summary>
-        /// 异步打开 UI (无泛型，返回 UIBase)
+        /// 异步打开 UI (无泛型)
         /// </summary>
-        public UIHandle<UIBase> OpenUIAsync(string key)
+        public void OpenUIAsync(string key)
         {
             UIHandle<UIBase> handle = new UIHandle<UIBase>();
             OpenInternal(key, null, (ui) => 
             {
                 handle.Complete(ui);
             });
-            return handle;
         }
 
         #endregion
         
-        #region API - 队列加载 (Queue)
+        #region API - 托管加载
 
         /// <summary>
-        /// 队列式打开 UI
-        /// 作用：保证 UI 严格按照调用顺序一个接一个地打开，前一个加载并初始化完毕后，才开始加载下一个。
-        /// 适用场景：新手引导、连续弹窗、剧情对话等对时序要求严格的模块。
+        /// 托管给队列打开 UI 
+        /// 应用场景：逻辑层连续打开多个UI，避免回调套用
         /// </summary>
-        public UIHandle<T> OpenUIByQueue<T>(string key) where T : UIBase
+        public UIHandle<T> OpenUIHosting<T>(string key) where T : UIBase
         {
             UIHandle<T> handle = new UIHandle<T>();
 
             // 将请求封装为一个 Action，推入队列
-            m_OpenQueue.Enqueue(() =>
+            m_OpenHostingQueue.Enqueue(() =>
             {
                 // 真正执行加载
                 OpenInternal(key, typeof(T), (ui) =>
@@ -246,61 +241,57 @@ namespace Game.Runtime.Hotfix
                     handle.Complete(ui as T);
                     
                     // 当前这个加载完成了，触发队列下一个
-                    CheckNextInQueue();
+                    CheckNextInHostingQueue();
                 });
             });
 
             // 如果当前队列没在跑，启动它
-            if (!m_IsQueueRunning)
+            if (!m_IsHostingRunning)
             {
-                CheckNextInQueue();
+                CheckNextInHostingQueue();
             }
 
             return handle;
         }
 
-        private void CheckNextInQueue()
+        private void CheckNextInHostingQueue()
         {
-            if (m_OpenQueue.Count > 0)
+            if (m_OpenHostingQueue.Count > 0)
             {
-                m_IsQueueRunning = true;
-                Action nextAction = m_OpenQueue.Dequeue();
+                m_IsHostingRunning = true;
+                Action nextAction = m_OpenHostingQueue.Dequeue();
                 nextAction?.Invoke();
             }
             else
             {
-                m_IsQueueRunning = false;
+                m_IsHostingRunning = false;
             }
         }
 
         #endregion
 
-        #region API - 互斥加载
+        #region API - 拦截式加载UI
 
         /// <summary>
-        /// 互斥式打开 UI
-        /// 作用：防止同一组功能的 UI 并发打开
-        /// 逻辑：
-        /// 1. 检查 flag 是否被占用。
-        /// 2. 如果被占用，且占用者不是当前 key -> 拒绝打开 (返回 null handle 或 失败 handle)。
-        /// 3. 如果未被占用，或占用者就是我自己 -> 允许打开，并标记占用。
+        /// 拦截式加载UI
+        /// 应用场景：回调层使用，避免因异步加载导致时序问题
         /// </summary>
-        public UIHandle<T> OpenUIByFlag<T>(string key) where T : UIBase
+        public UIHandle<T> LoadUIAsync<T>(string key) where T : UIBase
         {
             // 检查是否已经有正在打开的UI
-            if (m_OpenFlags.Count > 0)
+            if (m_IsLoading)
             {
                 // 如果当前 flag 已经被别人占用了 (ownerKey != key)，则拒绝本次请求
                 return null;
             }
             // 添加标志位
-            m_OpenFlags.Add(key);
+            m_IsLoading = true;
 
             // 劫持回调释放标志位
             UIHandle<T> handle = new UIHandle<T>();
             OpenInternal(key,typeof(T),(ui) =>
             {
-                m_OpenFlags.Remove(key);
+                m_IsLoading = false;
                 handle.Complete(ui as T);
             });
             return handle;
@@ -417,6 +408,7 @@ namespace Game.Runtime.Hotfix
 
             // 4. 异步加载资源
             m_LoadingUISet.Add(key);
+            bool forceGlobal = config.ResTypeByScene == ResTypeByScene.Global;
             m_App.gResMgr.LoadPrefabAsync(config.Path, (prefab) =>
             {
                 m_LoadingUISet.Remove(key);
@@ -437,7 +429,7 @@ namespace Game.Runtime.Hotfix
                 // 执行实例化
                 doInstantiate(prefab);
 
-            }, false); // false 表示不需要 ResMgr 强制缓存到 Global，因为 UIMgr 自己持有引用
+            }, forceGlobal);
         }
 
         /// <summary>
@@ -501,7 +493,7 @@ namespace Game.Runtime.Hotfix
         /// 关闭所有 UI
         /// </summary>
         /// <param name="keepLayer">可选：指定一个需要保留的层级 (例如 Main 层)。如果不传，则关闭所有。</param>
-        public void CloseAll(UILayer? keepLayer = null)
+        public void CloseAll(UILayer? keepLayer = UILayer.Main)
         {
             // 复制 Keys 列表防止修改集合报错
             var keys = new List<string>(m_OpenUIDic.Keys);
@@ -521,10 +513,10 @@ namespace Game.Runtime.Hotfix
             // 如果是全关，可以清理状态，但 Cache 由 LRU 管理，不强制 Clear
             if (keepLayer == null)
             {
-                m_OpenFlags.Clear();
-                m_OpenQueue.Clear();
                 m_OpenUIList.Clear();
-                m_IsQueueRunning = false;
+                m_OpenHostingQueue.Clear();
+                m_IsLoading = false;
+                m_IsHostingRunning = false;
             }
         }
 

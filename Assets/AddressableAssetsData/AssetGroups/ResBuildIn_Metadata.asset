@@ -53,6 +53,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9fe5a4c813e567e4d80339ef22342629
+    m_Address: Metadata/UnityEngine.InputLegacyModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ace6bcf0c94255942ae7cd95e0154ed6
     m_Address: Metadata/mscorlib.dll.bytes
     m_ReadOnly: 0

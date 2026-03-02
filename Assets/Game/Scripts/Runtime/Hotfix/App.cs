@@ -55,11 +55,11 @@ namespace Game.Runtime.Hotfix
         {
             if (gTimerMgr != null)
             {
-                gTimerMgr.OnTimerMapIUpdate(dt);
+                gTimerMgr.OnIUpdate(dt);
             }
             if (gFrameTimerMgr != null)
             {
-                gFrameTimerMgr.OnTimerMapIUpdate(dt);
+                gFrameTimerMgr.OnIUpdate(dt);
             }
             if (gAudioMgr != null)
             {

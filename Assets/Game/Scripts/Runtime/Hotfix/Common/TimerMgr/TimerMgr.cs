@@ -5,48 +5,42 @@ namespace Game.Runtime.Hotfix
     public class TimerMgr:IUpdate
     {
         private int m_Guid = 0;
-        private TimerMap<int,Timer> m_TimerMap;
+        private SafeMap<int,Timer> m_SafeMap;
         public TimerMgr()
         {
-            m_TimerMap = new TimerMap<int,Timer>();
+            m_SafeMap = new SafeMap<int,Timer>();
         }
         public void OnIUpdate(float dt)
         {
             if (dt > 0)
             {
-                m_TimerMap.OnIUpdate(dt);
+                m_SafeMap.OnIUpdate(dt);
             }
         }
-        public void OnTimerMapIUpdate(float dt)
-        {
-            if (dt > 0)
-            {
-                m_TimerMap.OnTimerMapIUpdate(dt);
-            }
-        }
+        
         public int AddTimer(float dtTime, int callTimes, Action<float, bool> callBack)
         {
             int guid = GetNewGuid();
             Timer timer = new Timer(this, guid, dtTime, callTimes, callBack);
-            m_TimerMap.Add(guid, timer);
+            m_SafeMap.Add(guid, timer);
             return guid;
         }
 
         public void RemoveTimer(int guid)
         {
-            m_TimerMap.Remove(guid);
+            m_SafeMap.Remove(guid);
         }
         public void SetTimerScale(int guid, float scale)
         {
-            IUpdate timer = m_TimerMap.Get(guid);
+            Timer timer = m_SafeMap[guid];
             if (timer != null)
             {
-                ((Timer)timer).SetTimeScale(scale);
+                timer.SetTimeScale(scale);
             }
         }
         public Timer GetTimer(int guid)
         {
-            return (Timer)m_TimerMap.Get(guid);
+            return m_SafeMap[guid];
         }
         private int GetNewGuid()
         {
@@ -55,7 +49,7 @@ namespace Game.Runtime.Hotfix
         }
         public void ClearTimer()
         {
-            m_TimerMap.OnDestroy();
+            m_SafeMap.OnDestroy();
         }
     }
 }

@@ -341,6 +341,7 @@ namespace Game.Runtime.AOT
             }
             
             long finishedSize = 0;
+            UpdateUI((float)finishedSize / totalSize, $"更新资源中...{HotUpdateUtils.FormatBytes(finishedSize)}/{HotUpdateUtils.FormatBytes(totalSize)}", true);
             foreach (var file in downloadList)
             {
                 string tempPath = Path.Combine(OuterPath, file.fileName + ".tmp");
@@ -354,7 +355,7 @@ namespace Game.Runtime.AOT
                         File.Move(tempPath, dest);
                         finishedSize += file.size;
                         Debug.Log($"[HotUpdateManager] 更新资源文件: {file.fileName}");
-                        UpdateUI((float)finishedSize / totalSize, $"更新资源中...", true);
+                        UpdateUI((float)finishedSize / totalSize, $"更新资源中...{HotUpdateUtils.FormatBytes(finishedSize)}/{HotUpdateUtils.FormatBytes(totalSize)}", true);
                     }
                 }
             }
