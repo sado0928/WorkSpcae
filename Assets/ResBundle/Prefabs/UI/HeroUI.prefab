@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: BagUI
+  m_text: HeroUI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 68e7b74fdac6be74b965704c7d2d933a, type: 2}
   m_sharedMaterial: {fileID: -245541324455271140, guid: 68e7b74fdac6be74b965704c7d2d933a, type: 2}
@@ -295,7 +295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.735849, g: 0.6532846, b: 0.05206478, a: 1}
+  m_Color: {r: 0.19784619, g: 0.735849, b: 0.7138836, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -321,9 +321,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 414572843222958631}
-  - component: {fileID: 4750724368250814861}
+  - component: {fileID: 8693194613304377004}
   m_Layer: 0
-  m_Name: BagUI
+  m_Name: HeroUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -345,7 +345,7 @@ Transform:
   - {fileID: 4833722985745279524}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4750724368250814861
+--- !u!114 &8693194613304377004
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -354,6 +354,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4839730355213899487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffb41eb4098cdf44592d7a1a5cbc55ed, type: 3}
+  m_Script: {fileID: 11500000, guid: 89986712d34643d2bf9d819d42e7fe6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

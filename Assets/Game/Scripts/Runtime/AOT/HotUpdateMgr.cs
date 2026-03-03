@@ -72,7 +72,8 @@ namespace Game.Runtime.AOT
         private IEnumerator BootSequence()
         {
             Debug.Log("<color=cyan>[Boot]</color> 引导程序开始运行...");
-            
+#if !UNITY_EDITOR            
+
             // [资源分析] 建立包内外资源快照
             yield return ScanLocalAssets();
 
@@ -80,10 +81,11 @@ namespace Game.Runtime.AOT
             bool isReady = false;
             yield return SyncRemoteAssets(ready => isReady = ready);
             if (!isReady) yield break;
-
+            
+#endif
             // [引擎激活] 初始化 Addressables 资源系统
             yield return BootResourceEngine();
-
+            
             // [环境注入] 加载元数据并启动热更新程序集
             yield return InjectHotfixRuntime();
 
@@ -217,6 +219,9 @@ namespace Game.Runtime.AOT
         {
             UpdateUI(0, "正在激活资源引擎...");
 
+            yield return Addressables.InitializeAsync();
+
+#if !UNITY_EDITOR
             // 重定向：如果是热更地址且沙盒存在，否则走本地
             Addressables.InternalIdTransformFunc = (location) => {
                 if (location.InternalId.StartsWith("http") || location.InternalId.StartsWith("ftp"))
@@ -260,9 +265,7 @@ namespace Game.Runtime.AOT
                 // 非远程地址，返回原 InternalId
                 return location.InternalId;
             };
-
-            yield return Addressables.InitializeAsync();
-
+            
             // 彻底清理默认 Locator，确保热更索引表是全局唯一的
             Addressables.ClearResourceLocators();
             
@@ -277,6 +280,7 @@ namespace Game.Runtime.AOT
                     yield return Addressables.LoadContentCatalogAsync(catalogPath);
                 }
             }
+#endif
         }
 
         // ===================================================================================

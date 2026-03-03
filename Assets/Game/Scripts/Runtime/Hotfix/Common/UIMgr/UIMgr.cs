@@ -26,6 +26,7 @@ namespace Game.Runtime.Hotfix
         
         // 层级根节点管理: Layer -> Transform
         private Dictionary<UILayer, Transform> m_LayerRoots = new Dictionary<UILayer, Transform>();
+        private Dictionary<UILayer, List<UIBase>> m_LayerUIData = new Dictionary<UILayer, List<UIBase>>();
         
         // 关闭时间记录: Key -> Time (用于 LRU 资源释放)
         private Dictionary<string, float> m_LastCloseTime = new Dictionary<string, float>();
@@ -42,13 +43,24 @@ namespace Game.Runtime.Hotfix
             { UILayer.Top, 3000 },
             { UILayer.System, 4000 }
         };
+        
+        // 层级基准 Distance
+        private Dictionary<UILayer, int> m_LayerBaseDistance = new Dictionary<UILayer, int>()
+        {
+            { UILayer.Main, 200 },
+            { UILayer.Normal, 160 },
+            { UILayer.PopUp, 120 },
+            { UILayer.Top, 80 },
+            { UILayer.System, 40 }
+        };
 
         // sorting设置
         public int m_OrderDefalut { get; private set; } = 0;
         public int m_OrderStep { get; private set; } = 5;
-        public float m_DistanceDefault { get; private set; } = 100f;
+        public float m_DistanceDefault { get; private set; } = 200f;
         public float m_DistanceStep { get; private set; } = 5f;
         
+        public float m_DistanceMin { get; private set; } = 0f;
         // 动态引用的组件
         public Canvas m_RootCanvas { get; private set; }
         public Camera m_UICamera { get; private set; }
@@ -133,13 +145,9 @@ namespace Game.Runtime.Hotfix
                 return m_OpenUIList.Count > 0 ? m_OpenUIList.Last() : null;
             }
 
-            // 从栈顶向下查找，第一个符合层级的 UI 即为该层级的最顶层
-            for (int i = m_OpenUIList.Count - 1; i >= 0; i--)
+            if (m_LayerUIData.TryGetValue(layer.Value,out List<UIBase> layerUIList))
             {
-                if (m_OpenUIList[i].Config.Layer == layer.Value)
-                {
-                    return m_OpenUIList[i];
-                }
+                return layerUIList.Count > 0 ? layerUIList.Last() : null;
             }
             return null;
         }
@@ -303,30 +311,47 @@ namespace Game.Runtime.Hotfix
 
         private void OpenInternal(string key, Type scriptType, Action<UIBase> onComplete)
         {
-            // 0. 获取配置
+            // 1. 获取配置
             UIConfig config = UIDefine.GetUIConfig(key);
             if (config == null)
             {
                 onComplete?.Invoke(null);
                 return;
             }
-
-            // 1. 检查是否已经打开 (Active)
-            if (m_OpenUIDic.TryGetValue(key, out UIBase activeUI))
+            
+            // 2.检查是否超过当前Layer显示数量
+            UIBase topUI = GetTopUI(config.Layer);
+            if (topUI != null)
             {
-                // 如果已经打开，将其挪到最上层 (Stack 逻辑)
-                if (m_OpenUIList.Contains(activeUI)) m_OpenUIList.Remove(activeUI);
-                
-                // 重新计算 Sorting (基于当前其他 UI)
-                SetupUIState(activeUI, config);
-                
-                m_OpenUIList.Add(activeUI);
-                
-                onComplete?.Invoke(activeUI);
-                return;
+                float minDistance = m_LayerRoots.ContainsKey(config.Layer + 1)
+                    ? m_LayerBaseDistance[config.Layer + 1]
+                    : m_DistanceMin;
+                if (topUI.m_FinalDistance - m_DistanceStep < minDistance)
+                {
+                    Global.LogError($"[UIMgr] Layer {config.Layer} is max ,changed for distance config.");
+                    onComplete?.Invoke(null);
+                    return;
+                }
             }
 
-            // 2. 检查是否正在加载中 (防并发)
+            // 3. 检查是否已经打开 (Active)
+            if (m_OpenUIDic.TryGetValue(key,out UIBase openedUI))
+            {
+                CloseUI(key);
+                
+                List<UIBase> layerUIData = m_LayerUIData[config.Layer];
+                // 倒序找一下哪些需要重新SetSorting
+                for (int i = layerUIData.Count - 1; i >= 0; i--)
+                {
+                    var uiBase = layerUIData[i];
+                    if (uiBase.m_FinalDistance < openedUI.m_FinalDistance)
+                    {
+                        uiBase.SetReduceSorting(uiBase.m_FinalOrder,uiBase.m_FinalDistance);
+                    }
+                }
+            }
+
+            // 4. 检查是否正在加载中 (防并发)
             if (m_LoadingUISet.Contains(key))
             {
                 Debug.LogWarning($"[UIMgr] UI {key} is already loading. Ignored duplicate request.");
@@ -370,10 +395,16 @@ namespace Game.Runtime.Hotfix
                     // 初始化业务
                     script.OnInit(key, config);
 
-                    // 加入 Active 缓存和栈
+                    // 加入缓存管理
                     m_OpenUIDic.Add(key, script);
                     m_OpenUIList.Add(script);
-                    
+                    // 加入层级管理
+                    if (!m_LayerUIData.ContainsKey(config.Layer))
+                    {
+                        m_LayerUIData.Add(config.Layer,new List<UIBase>());
+                    }
+                    m_LayerUIData[config.Layer].Add(script);
+                   
                     // 移除上一轮的关闭时间记录 (如果存在)，因为它现在活过来了
                     if (m_LastCloseTime.ContainsKey(key)) m_LastCloseTime.Remove(key);
 
@@ -390,7 +421,7 @@ namespace Game.Runtime.Hotfix
                 }
             };
 
-            // 3. 检查资源缓存 (m_ResCache)
+            // 5. 检查资源缓存 (m_ResCache)
             if (m_ResCache.TryGetValue(key, out GameObject cachedPrefab))
             {
                 // 资源已在内存，直接实例化
@@ -406,7 +437,7 @@ namespace Game.Runtime.Hotfix
                 }
             }
 
-            // 4. 异步加载资源
+            // 6. 异步加载资源
             m_LoadingUISet.Add(key);
             bool forceGlobal = config.ResTypeByScene == ResTypeByScene.Global;
             m_App.gResMgr.LoadPrefabAsync(config.Path, (prefab) =>
@@ -453,16 +484,17 @@ namespace Game.Runtime.Hotfix
             {
                 // 先拿各自UI层级的基础值
                 finalOrder = m_LayerBaseOrder[config.Layer];
+                finalDistance = m_LayerBaseDistance[config.Layer];
             }
             // 将参数传进去，让 UIBase 为每个子 Canvas 独立计算 Distance
-            ui.SetSorting(finalOrder, finalDistance);
+            ui.SetAddSorting(finalOrder, finalDistance);
         }
 
         #endregion
 
         #region 关闭与销毁
 
-        public void Close(string key)
+        public void CloseUI(string key)
         {
             if (m_OpenUIDic.TryGetValue(key, out UIBase ui))
             {
@@ -470,9 +502,19 @@ namespace Game.Runtime.Hotfix
                 // 1. 生命周期
                 ui.OnClose(lastCloseTime);
                 
-                // 2. 维护 UI 栈：从栈中移除
-                if (m_OpenUIList.Contains(ui)) m_OpenUIList.Remove(ui);
+                // 2. 维护 UI 数据
+                if (m_OpenUIList.Contains(ui))
+                {
+                    m_OpenUIList.Remove(ui);
+                }
+                
+                m_OpenUIDic.Remove(key);
 
+                if (m_LayerUIData.ContainsKey(ui.Config.Layer))
+                {
+                    m_LayerUIData[ui.Config.Layer].Remove(ui);
+                }
+                
                 // 3. 记录关闭时间 (用于 LRU 释放资源)
                 // 只有当配置了非 KeepCached 时才记录，KeepCached 的永远不记录时间（免死金牌）
                 if (!ui.Config.KeepCached)
@@ -482,17 +524,13 @@ namespace Game.Runtime.Hotfix
 
                 // 4. 销毁实例
                 m_App.gResMgr.Destroy(ui.gameObject);
-                
-                // 5. 移除活动缓存
-                m_OpenUIDic.Remove(key);
-                
             }
         }
         
         /// <summary>
         /// 关闭所有 UI
         /// </summary>
-        /// <param name="keepLayer">可选：指定一个需要保留的层级 (例如 Main 层)。如果不传，则关闭所有。</param>
+        /// <param name="keepLayer">可选：指定一个需要保留的层级 (例如 Main 层)。如果传null，则关闭所有。</param>
         public void CloseAll(UILayer? keepLayer = UILayer.Main)
         {
             // 复制 Keys 列表防止修改集合报错
@@ -506,14 +544,16 @@ namespace Game.Runtime.Hotfix
                     {
                         continue;
                     }
-                    Close(key);
+                    CloseUI(key);
                 }
             }
 
-            // 如果是全关，可以清理状态，但 Cache 由 LRU 管理，不强制 Clear
+            // 如果是全关清理状态
             if (keepLayer == null)
             {
                 m_OpenUIList.Clear();
+                m_OpenUIDic.Clear();
+                m_LayerUIData.Clear();
                 m_OpenHostingQueue.Clear();
                 m_IsLoading = false;
                 m_IsHostingRunning = false;

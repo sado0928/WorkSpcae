@@ -79,10 +79,15 @@ namespace Game.Runtime.Hotfix
     /// </summary>
     public class UIDefine
     {
-        public static string LoadingUI = "LoadingUI";
-        public static string MainUI = "MainUI";
-        public static string HeadUI = "HeadUI";
-        public static string BagUI = "BagUI";
+        public const string LoadingUI = "LoadingUI";
+        public const string MainUI = "MainUI";
+        public const string HeadUI = "HeadUI";
+        public const string BagUI = "BagUI";
+        public const string HeroUI = "HeroUI";
+        public const string LevelUI = "LevelUI";
+        public const string HelpUI = "HelpUI";
+        public const string SettingUI = "SettingUI";
+        public const string ShopUI = "ShopUI";
 
         #region 配置字典
 
@@ -92,6 +97,11 @@ namespace Game.Runtime.Hotfix
             {MainUI,new UIConfig(){Path ="Prefabs/UI/MainUI",Layer = UILayer.Main, ResTypeByScene = ResTypeByScene.Global}},
             {HeadUI,new UIConfig(){Path ="Prefabs/UI/HeadUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
             {BagUI,new UIConfig(){Path ="Prefabs/UI/BagUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {HeroUI,new UIConfig(){Path ="Prefabs/UI/HeroUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {LevelUI,new UIConfig(){Path ="Prefabs/UI/LevelUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {HelpUI,new UIConfig(){Path ="Prefabs/UI/HelpUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {SettingUI,new UIConfig(){Path ="Prefabs/UI/SettingUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
+            {ShopUI,new UIConfig(){Path ="Prefabs/UI/ShopUI",Layer = UILayer.Normal, ResTypeByScene = ResTypeByScene.Global}},
         };
 
         #endregion

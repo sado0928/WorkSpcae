@@ -121,34 +121,64 @@ namespace Game.Runtime.Hotfix
         /// <summary>
         /// 统一设置所有子 Canvas 的排序、距离和相机
         /// </summary>
-        public void SetSorting(int order, float distance)
+        public void SetAddSorting(int order, float distance)
         {
             if (m_SubCanvases == null) return;
-            var uiCamera = Global.gApp.gUIMgr.m_UICamera;
             var distanceStep = Global.gApp.gUIMgr.m_DistanceStep;
             var orderStep = Global.gApp.gUIMgr.m_OrderStep;
             foreach (Canvas canvas in m_SubCanvases)
             {
                 if (canvas != null)
                 {
-                    // 1. 设置 Order (基准 + 偏移)
+                    // 1. 设置 Order 
                     m_FinalOrder = order + orderStep;
                     canvas.sortingOrder = m_FinalOrder;
                     
                     // 2. 设置 RenderMode 和 Camera
                     if (canvas.renderMode != RenderMode.WorldSpace)
                     {
+                        var uiCamera = Global.gApp.gUIMgr.m_UICamera;
                         canvas.renderMode = RenderMode.ScreenSpaceCamera;
                         canvas.worldCamera = uiCamera;
-                        
-                        // 3. 独立计算每个 SubCanvas 的 Distance
-                        m_FinalDistance = distance - distanceStep;
-                        canvas.planeDistance = m_FinalDistance;
                     }
+                    
+                    // 3. 独立计算每个 SubCanvas 的 Distance
+                    m_FinalDistance = distance - distanceStep;
+                    canvas.planeDistance = m_FinalDistance;
                 }
             }
         }
 
+        /// <summary>
+        /// 统一设置所有子 Canvas 的排序、距离和相机
+        /// </summary>
+        public void SetReduceSorting(int order, float distance)
+        {
+            if (m_SubCanvases == null) return;
+            var distanceStep = Global.gApp.gUIMgr.m_DistanceStep;
+            var orderStep = Global.gApp.gUIMgr.m_OrderStep;
+            foreach (Canvas canvas in m_SubCanvases)
+            {
+                if (canvas != null)
+                {
+                    // 1. 设置 Order 
+                    m_FinalOrder = order - orderStep;
+                    canvas.sortingOrder = m_FinalOrder;
+                    
+                    // 2. 设置 RenderMode 和 Camera
+                    if (canvas.renderMode != RenderMode.WorldSpace)
+                    {
+                        var uiCamera = Global.gApp.gUIMgr.m_UICamera;
+                        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                        canvas.worldCamera = uiCamera;
+                    }
+                    
+                    // 3. 独立计算每个 SubCanvas 的 Distance
+                    m_FinalDistance = distance + distanceStep;
+                    canvas.planeDistance = m_FinalDistance;
+                }
+            }
+        }
         /// <summary>
         /// 检查或创建点击遮罩
         /// 遮罩将挂载到第一个子 Canvas 节点下
@@ -188,7 +218,7 @@ namespace Game.Runtime.Hotfix
             {
                 if (!string.IsNullOrEmpty(Key))
                 {
-                    Global.gApp.gUIMgr.Close(Key);
+                    Global.gApp.gUIMgr.CloseUI(Key);
                 }
             });
         }

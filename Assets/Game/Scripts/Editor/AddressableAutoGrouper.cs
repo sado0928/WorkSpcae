@@ -45,7 +45,7 @@ public class AddressableAutoGrouper
         
         settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, null, true);
         AssetDatabase.SaveAssets();
-
+        AssetDatabase.Refresh();
         Debug.Log("[AddressableAutoGrouper] 自动分组完成！");
     }
 

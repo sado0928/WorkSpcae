@@ -631,8 +631,7 @@ namespace Game.Editor
                 scenes = GetBuildScenes(),
                 locationPathName = tempBuildPath,
                 target = EditorUserBuildSettings.activeBuildTarget,
-                // 【核心优化】: 只构建脚本。
-                // 这会触发 IL2CPP 编译和 DLL 裁剪，但跳过极其耗时的资源打包过程。
+                // 只构建脚本。这会触发 IL2CPP 编译和 DLL 裁剪，但跳过极其耗时的资源打包过程。
                 options = BuildOptions.BuildScriptsOnly 
             };
 

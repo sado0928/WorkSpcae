@@ -4,12 +4,11 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.Hotfix
 {
-    public partial class MainUI:UIBase
+    public partial class ShopUI:UIBase
     {
         
         protected override void OnInit()
         {
-            Global.LogError("进入到MainUI界面!");
         }
          
         protected override void OnClose()

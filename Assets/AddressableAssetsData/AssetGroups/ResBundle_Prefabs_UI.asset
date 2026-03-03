@@ -17,6 +17,12 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: b8f668b422507a0448d605955173447e
   m_SerializeEntries:
+  - m_GUID: 053e79255350c2540b25d3378f5e3e85
+    m_Address: Prefabs/UI/LevelUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13eb00b37107b194e941b6969054566b
     m_Address: Prefabs/UI/LoadingUI.prefab
     m_ReadOnly: 0
@@ -35,8 +41,32 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b2ea54cf39842d4e9705ab9ff1a321e
+    m_Address: Prefabs/UI/HeroUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d8889d294470c247acdd417e76a53e3
+    m_Address: Prefabs/UI/SettingUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92993108a12a8a84fa2c54b038739638
+    m_Address: Prefabs/UI/HelpUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae735b883ec8cfb4d94a05e2baf101e0
     m_Address: Prefabs/UI/BagUI.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dec75ab43b248ab458d6fc390b0868a0
+    m_Address: Prefabs/UI/ShopUI.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - default

@@ -9,7 +9,6 @@ namespace Game.Runtime.Hotfix
         
         protected override void OnInit()
         {
-            Global.LogError("HeadUI界面!");
         }
          
         protected override void OnClose()

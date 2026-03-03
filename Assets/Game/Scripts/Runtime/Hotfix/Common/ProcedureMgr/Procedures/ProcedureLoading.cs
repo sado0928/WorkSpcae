@@ -92,7 +92,7 @@ namespace Game.Runtime.Hotfix
         public override void OnLeave()
         {
             // 关闭 Loading UI
-            Global.gApp.gUIMgr.Close(UIDefine.LoadingUI);
+            Global.gApp.gUIMgr.CloseUI(UIDefine.LoadingUI);
         }
 
         public override void OnDestroy()

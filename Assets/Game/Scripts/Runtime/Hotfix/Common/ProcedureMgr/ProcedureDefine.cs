@@ -17,8 +17,8 @@ namespace Game.Runtime.Hotfix
     /// </summary>
     public class ProcedureDefine
     {
-        public static string LoadingScene = "LoadingScene";
-        public static string MainScene = "MainScene";
+        public const string LoadingScene = "LoadingScene";
+        public const string MainScene = "MainScene";
 
         public static Dictionary<string, ProcedureConfig> ProcedureInfo = new Dictionary<string, ProcedureConfig>()
         {

@@ -45,7 +45,26 @@ namespace Game.Runtime.Hotfix
             if (Input.GetKeyDown(KeyCode.F2))
             {
                 gApp.gUIMgr.LoadUIAsync<BagUI>(UIDefine.BagUI);
-
+            }
+            if (Input.GetKeyDown(KeyCode.F3))
+            {
+                gApp.gUIMgr.LoadUIAsync<HeroUI>(UIDefine.HeroUI);
+            }
+            if (Input.GetKeyDown(KeyCode.F4))
+            {
+                gApp.gUIMgr.LoadUIAsync<LevelUI>(UIDefine.LevelUI);
+            }
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                gApp.gUIMgr.LoadUIAsync<HelpUI>(UIDefine.HelpUI);
+            }
+            if (Input.GetKeyDown(KeyCode.F6))
+            {
+                gApp.gUIMgr.LoadUIAsync<SettingUI>(UIDefine.SettingUI);
+            } 
+            if (Input.GetKeyDown(KeyCode.F7))
+            {
+                gApp.gUIMgr.LoadUIAsync<ShopUI>(UIDefine.ShopUI);
             }
         }
     
