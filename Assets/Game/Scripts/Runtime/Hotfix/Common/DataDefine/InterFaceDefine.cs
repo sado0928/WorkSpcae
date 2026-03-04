@@ -4,4 +4,10 @@
     {
         void OnIUpdate(float dt);
     }
+    
+    
+    public class InterFaceDefine
+    {
+        
+    }
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Game.Runtime.Hotfix
 {
-    public enum EventDefine
+    public class EventDefine
     {
-        LoadingFinish = 1000,
+        public const string LoadingFinish = "LoadingFinish";
     }
 }

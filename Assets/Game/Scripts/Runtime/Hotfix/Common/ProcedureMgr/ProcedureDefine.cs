@@ -15,7 +15,7 @@ namespace Game.Runtime.Hotfix
     /// <summary>
     /// Procedure 定义文件
     /// </summary>
-    public class ProcedureDefine
+    public static class ProcedureDefine
     {
         public const string LoadingScene = "LoadingScene";
         public const string MainScene = "MainScene";

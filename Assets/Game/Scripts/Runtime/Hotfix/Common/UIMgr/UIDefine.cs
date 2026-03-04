@@ -75,9 +75,14 @@ namespace Game.Runtime.Hotfix
     }
 
     /// <summary>
+    /// UI数据对象基类
+    /// </summary>
+    public class UIDataBase {}
+
+    /// <summary>
     /// UI 定义文件
     /// </summary>
-    public class UIDefine
+    public static class UIDefine
     {
         public const string LoadingUI = "LoadingUI";
         public const string MainUI = "MainUI";

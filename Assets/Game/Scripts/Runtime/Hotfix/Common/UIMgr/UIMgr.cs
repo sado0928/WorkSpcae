@@ -177,6 +177,15 @@ namespace Game.Runtime.Hotfix
             return null;
         }
 
+        public UIBase GetUI(string key) 
+        {
+            if (m_OpenUIDic.TryGetValue(key, out UIBase ui))
+            {
+                return ui;
+            }
+            return null;
+        }
+        
         /// <summary>
         /// 获取当前所有打开的 UI
         /// </summary>
@@ -605,7 +614,14 @@ namespace Game.Runtime.Hotfix
         }
 
         #endregion
-        
+
+        #region UI事件传递
+        public void SendUIMsg(string uiName) { GetUI(uiName)?.OnRefresh(); }
+        public void SendUIMsg(string uiName, int args) { GetUI(uiName)?.OnRefresh(args); }
+        public void SendUIMsg(string uiName, string args) { GetUI(uiName)?.OnRefresh(args); }
+        public void SendUIMsg(string uiName, UIDataBase args) { GetUI(uiName)?.OnRefresh(args); }
+
+        #endregion
         public void OnIUpdate(float dt)
         {
             if (m_App.gResMgr.CurrentTypeBySceneType is ResTypeByScene.Global)

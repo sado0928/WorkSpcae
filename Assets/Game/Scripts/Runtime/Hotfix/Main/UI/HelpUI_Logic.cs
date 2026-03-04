@@ -14,9 +14,5 @@ namespace Game.Runtime.Hotfix
         protected override void OnClose()
         {
         }
-
-        protected override void OnRefresh()
-        {
-        }
     }
 }

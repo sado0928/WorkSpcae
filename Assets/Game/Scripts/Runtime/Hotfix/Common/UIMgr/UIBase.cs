@@ -4,10 +4,10 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.Hotfix
 {
-    public abstract class UIBase : MonoBehaviour
+    public abstract class UIBase : ResBase
     {
-        private RectTransform m_RectTransform;
-
+        public RectTransform m_RectTransform { get; private set; }
+        
         // 当前 UI 的配置信息
         public UIConfig Config { get; private set; }
 
@@ -22,13 +22,14 @@ namespace Game.Runtime.Hotfix
 
         // Canvas 管理 (使用并行列表简化结构)
         private List<Canvas> m_SubCanvases = new List<Canvas>();
-        
+
         // 定时器
         private List<int> m_TimerIds = new List<int>();
         private List<int> m_FrameTimerIds = new List<int>();
 
         public int m_FinalOrder { get;private set; } 
         public float m_FinalDistance { get;private set; } 
+        
         /// <summary>
         /// 获取主 Canvas (用于 UIMgr 设置 Camera 等)
         /// </summary>
@@ -84,6 +85,17 @@ namespace Game.Runtime.Hotfix
             
         }
 
+        protected override void OnDestroy()
+        {
+            // 1. 调用 ResBase 的资源自动释放逻辑
+            base.OnDestroy();
+
+            // 2. 清理 UI 特有的引用
+            m_SubCanvases.Clear();
+            m_TimerIds.Clear();
+            m_FrameTimerIds.Clear();
+        }
+        
         /// <summary>
         /// 初始化 (仅第一次加载时调用)
         /// </summary>
@@ -115,9 +127,12 @@ namespace Game.Runtime.Hotfix
         // 定义抽象每个UI脚本实现
         protected abstract void OnInit();
         protected abstract void OnClose();
-        
-        protected abstract void OnRefresh();
-        
+
+        public virtual void OnRefresh(){}
+        public virtual void OnRefresh(int val){}
+        public virtual void OnRefresh(string val){}
+        public virtual void OnRefresh(UIDataBase val){}
+
         /// <summary>
         /// 统一设置所有子 Canvas 的排序、距离和相机
         /// </summary>
