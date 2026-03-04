@@ -64,7 +64,7 @@ namespace Game.Editor
             Debug.Log($"[HybridCLR] 已同步 {count} 个 AOT 元数据文件");
 
             AssetDatabase.Refresh();
-            AddressableAutoGrouper.AutoGroup();
+            AddressableAutoGroupTool.AutoGroup();
             
             Debug.Log("<b>[HybridCLR]</b> === 同步流程完成！ ===");
         }

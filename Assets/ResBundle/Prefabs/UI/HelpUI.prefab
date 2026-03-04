@@ -321,7 +321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 414572843222958631}
-  - component: {fileID: 6611173851408352227}
+  - component: {fileID: 1630925674071925863}
   m_Layer: 0
   m_Name: HelpUI
   m_TagString: Untagged
@@ -345,7 +345,7 @@ Transform:
   - {fileID: 4833722985745279524}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6611173851408352227
+--- !u!114 &1630925674071925863
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -354,6 +354,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4839730355213899487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f8aa7526a8c49d78a59a7afca1f7c0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8eb0070259ac17943820614e9d14e2be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

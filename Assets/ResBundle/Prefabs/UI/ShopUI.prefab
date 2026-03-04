@@ -321,7 +321,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 414572843222958631}
-  - component: {fileID: 5534426872361722898}
+  - component: {fileID: 3840362415741243823}
   m_Layer: 0
   m_Name: ShopUI
   m_TagString: Untagged
@@ -345,7 +345,7 @@ Transform:
   - {fileID: 4833722985745279524}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5534426872361722898
+--- !u!114 &3840362415741243823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -354,6 +354,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 4839730355213899487}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2d4155d00824693a2757f604319ec3f, type: 3}
+  m_Script: {fileID: 11500000, guid: 887316ece58a5624893801658fbceada, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
