@@ -1,22 +1,22 @@
-﻿using System.Timers;
 using UnityEngine;
 
 namespace Game.Runtime.Hotfix
 {
-    public class App:IUpdate
+    public class App : IUpdate
     {
-        public Global gGlobal { get;private set; }
-        public Transform m_KeepNode { get;private set; }
-        public Canvas gCanvas { get;private set; }
-        public Camera gUICamera { get;private set; }
+        public Global gGlobal { get; private set; }
+        public Transform m_KeepNode { get; private set; }
+        public Canvas gCanvas { get; private set; }
+        public Camera gUICamera { get; private set; }
         public DispatcherMgr gDispatcherMgr { get; set; }
-        public ResMgr gResMgr { get;private set; }
-        public TimerMgr gTimerMgr { get;private set; }
-        public FrameTimerMgr gFrameTimerMgr { get;private set; }
+        public ResMgr gResMgr { get; private set; }
+        public TimerMgr gTimerMgr { get; private set; }
+        public FrameTimerMgr gFrameTimerMgr { get; private set; }
         public AudioMgr gAudioMgr { get; private set; }
-        public UIMgr gUIMgr { get;private set; }
-        public ProcedureMgr gProcedureMgr { get;private set; }
-     
+        public UIMgr gUIMgr { get; private set; }
+        public PoolMgr gPoolMgr { get; private set; }
+        public EffectMgr gEffectMgr { get; private set; }
+        public ProcedureMgr gProcedureMgr { get; private set; }
 
         public void OnAwake(Global global)
         {
@@ -33,46 +33,28 @@ namespace Game.Runtime.Hotfix
             gResMgr = new ResMgr();
             gTimerMgr = new TimerMgr();
             gFrameTimerMgr = new FrameTimerMgr();
-            
-            // 初始化音频管理器
+            gPoolMgr = new PoolMgr();
+            gEffectMgr = new EffectMgr();
             gAudioMgr = new AudioMgr();
-            gAudioMgr.Init(m_KeepNode);
-
-            // 初始化 UI 管理器并挂载 UIRoot 到 KeepNode
             gUIMgr = new UIMgr();
-            gUIMgr.Init(m_KeepNode);
 
             // 初始化流程管理器
             gProcedureMgr = new ProcedureMgr();
-            
+
             Debug.Log("=== Hotfix: App Started, Managers Initialized ===");
-            
-            // 启动主流程 (内部会自动先切 Loading)
+
+            // 启动主流程
             gProcedureMgr.ChangeState(ProcedureDefine.MainScene);
         }
-        
+
         public void OnIUpdate(float dt)
         {
-            if (gTimerMgr != null)
-            {
-                gTimerMgr.OnIUpdate(dt);
-            }
-            if (gFrameTimerMgr != null)
-            {
-                gFrameTimerMgr.OnIUpdate(dt);
-            }
-            if (gAudioMgr != null)
-            {
-                gAudioMgr.OnIUpdate(dt);
-            }
-            if (gUIMgr != null)
-            {
-                gUIMgr.OnIUpdate(dt);
-            }
-            if (gProcedureMgr != null)
-            {
-                gProcedureMgr.OnIUpdate(dt);
-            }
+            if (gTimerMgr != null) gTimerMgr.OnIUpdate(dt);
+            if (gFrameTimerMgr != null) gFrameTimerMgr.OnIUpdate(dt);
+            if (gAudioMgr != null) gAudioMgr.OnIUpdate(dt);
+            if (gUIMgr != null) gUIMgr.OnIUpdate(dt);
+            if (gEffectMgr != null) gEffectMgr.OnIUpdate(dt);
+            if (gProcedureMgr != null) gProcedureMgr.OnIUpdate(dt);
         }
 
         public void OnDestroy()
@@ -80,8 +62,8 @@ namespace Game.Runtime.Hotfix
             if (gAudioMgr != null) gAudioMgr.OnDestroy();
             if (gProcedureMgr != null) gProcedureMgr.OnDestroy();
             if (gResMgr != null) gResMgr.OnDestroy();
+            if (gPoolMgr != null) gPoolMgr.OnDestroy();
+            if (gEffectMgr != null) gEffectMgr.OnDestroy();
         }
-
-       
     }
 }

@@ -39,14 +39,14 @@ namespace Game.Runtime.Hotfix
         // 监听器
         private AudioListener m_MainListener;
 
-        public void Init(Transform keepNode)
+        public AudioMgr()
         {
             m_App = Global.gApp;
             
             // 创建音频根节点
             GameObject go = new GameObject("AudioRoot");
             m_AudioRoot = go.transform;
-            m_AudioRoot.SetParent(keepNode);
+            m_AudioRoot.SetParent(m_App.m_KeepNode);
 
             // 1. 先清理场景中可能存在的冗余监听器（比如 LogoScene 自带的）
             AudioListener[] listeners = Object.FindObjectsOfType<AudioListener>();
@@ -308,7 +308,11 @@ namespace Game.Runtime.Hotfix
                 source.volume = m_SoundVolume * m_GlobalVolume;
                 source.Play();
                 
-                Object.Destroy(go, clip.length + 0.1f);
+                // 使用框架定时器代替原生延迟销毁，确保切场景安全
+                Global.gApp.gTimerMgr.AddTimer(clip.length + 0.1f, 1, (t, isEnd) =>
+                {
+                    if (go != null) Object.Destroy(go);
+                });
             }, forceGlobal);
         }
 
@@ -370,7 +374,7 @@ namespace Game.Runtime.Hotfix
         {
             if (m_AudioRoot != null)
             {
-                Object.Destroy(m_AudioRoot.gameObject);
+                Global.gApp.gResMgr.Destroy(m_AudioRoot.gameObject);
             }
         }
     }

@@ -101,6 +101,12 @@ namespace Game.Runtime.Hotfix
                 {
                     gApp.gResMgr.UnLoadAssets();
                 }
+                
+                // 3. 强制清理特效
+                if (gApp.gEffectMgr != null)
+                {
+                    gApp.gEffectMgr.SetEffectIsLimit(true);
+                }
             }
         }
         

@@ -42,20 +42,12 @@ namespace Game.Runtime.Hotfix
                 return null;
             }
         }
-
-        public RectTransform RectTransform
-        {
-            get
-            {
-                if (m_RectTransform == null) m_RectTransform = GetComponent<RectTransform>();
-                return m_RectTransform;
-            }
-        }
-
+        
         protected virtual void Awake()
         {
-            m_RectTransform = GetComponent<RectTransform>();
-
+            var rectTransform = GetComponent<RectTransform>();
+            if (rectTransform == null) rectTransform = gameObject.AddComponent<RectTransform>();
+            m_RectTransform = rectTransform;
             // 规则检查：根节点不允许挂载 Canvas
             if (GetComponent<Canvas>() != null)
             {

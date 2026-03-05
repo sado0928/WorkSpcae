@@ -18,8 +18,24 @@ namespace Game.Runtime.Hotfix
 
         // 动态资源追踪表：记录本对象生命周期内通过该脚本加载的所有资源路径
         private Dictionary<string, ResType> m_LoadedAssets = new Dictionary<string, ResType>();
+        // 托管特效列表：UI 销毁时自动回收关联特效
+        private List<EffectHandle> m_ManagedEffects = new List<EffectHandle>();
 
-        #region 极简资源加载接口 (Simplified API)
+        #region 资源加载接口 (Simplified API)
+
+        /// <summary>
+        /// 播放 UI 特效并托管生命周期
+        /// </summary>
+        /// <param name="path">特效资源路径</param>
+        /// <param name="parent">挂点，默认为当前 UI</param>
+        /// <returns></returns>
+        public EffectHandle PlayEffect(string path, Transform parent,float duration = -1f, bool isLoop = false)
+        {
+            if (string.IsNullOrEmpty(path)) return null;
+            var handle = Global.gApp.gEffectMgr.PlayEffect(path, parent,duration,isLoop);
+            m_ManagedEffects.Add(handle);
+            return handle;
+        }
 
         /// <summary>
         /// 自动加载并设置图片 (Image)
@@ -109,7 +125,7 @@ namespace Game.Runtime.Hotfix
             }
         }
 
-        private void ReleaseTrackedAssets()
+        private void ReleaseAssets()
         {
             if (m_LoadedAssets.Count == 0) return;
 
@@ -120,12 +136,24 @@ namespace Game.Runtime.Hotfix
 
             m_LoadedAssets.Clear();
         }
-
+        
+        private void DisposeEffect()
+        {
+            if (m_ManagedEffects != null)
+            {
+                foreach (var handle in m_ManagedEffects)
+                {
+                    if (handle != null) handle.Dispose();
+                }
+                m_ManagedEffects.Clear();
+            }
+        }
         protected virtual void OnDestroy()
         {
-            ReleaseTrackedAssets();
+            ReleaseAssets();
+            DisposeEffect();
         }
-
+        
         #endregion
     }
 }

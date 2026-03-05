@@ -35,20 +35,17 @@ namespace Game.Runtime.Hotfix
         }
         public void OnIUpdate(float dt)
         {
-            float curTimer = m_CurTime + dt * m_scale;
-            if ((curTimer - m_DtTime) >= 0)
+            m_CurTime += dt * m_scale;
+            while (m_CurTime >= m_DtTime)
             {
-                // 修正：减去周期时间，保留误差，防止时间越跑越慢
-                curTimer -= m_DtTime;
-                
+                m_CurTime -= m_DtTime;
                 m_CurCallTimes++;
                 CheckEnd();
-                
-                // 注意：如果 CheckEnd 导致 RemoveSelf，m_IsEnd 会变 true
-                // 这里把 dt 传回去可能不准(因为只是触发了一次)，但通常够用
                 m_CallBack(dt, m_IsEnd);
+                
+                // 如果已经结束，立即停止追帧
+                if (m_IsEnd) break;
             }
-            m_CurTime = curTimer;
         }
         public void CheckEnd()
         {

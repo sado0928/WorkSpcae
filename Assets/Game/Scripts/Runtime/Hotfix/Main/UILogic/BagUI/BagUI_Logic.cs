@@ -9,10 +9,5 @@ namespace Game.Runtime.Hotfix
         protected override void OnClose()
         {
         }
-
-        public override void OnRefresh()
-        {
-            base.OnRefresh();
-        }
     }
 }

@@ -76,7 +76,8 @@ namespace Game.Runtime.Hotfix
         private float m_AutoReleaseResTime = 0;
 
         private float m_AutoReleaseResTimeLeft = 60f;//自动卸载 计时器
-        public void Init(Transform keepNode)
+        
+        public UIMgr() 
         {
             m_App = Global.gApp;
 
@@ -107,7 +108,7 @@ namespace Game.Runtime.Hotfix
             // 2. 创建 UIRoot
             GameObject rootGO = new GameObject("UIRoot");
             m_UIRoot = rootGO.transform;
-            m_UIRoot.SetParent(keepNode, false);
+            m_UIRoot.SetParent(m_App.m_KeepNode, false);
             
             // 3. 初始化各层级根节点
             m_LayerRoots.Clear();

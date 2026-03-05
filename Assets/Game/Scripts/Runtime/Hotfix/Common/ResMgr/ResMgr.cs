@@ -9,30 +9,6 @@ using UnityEngine.U2D;
 namespace Game.Runtime.Hotfix
 {
     /// <summary>
-    /// 资源类型枚举
-    /// 作用：定义资源的逻辑分类，解耦具体目录结构
-    /// </summary>
-    public enum ResType
-    {
-        Prefab = 0, //预制
-        SpriteAtlas, //图集
-        Sprite, //图片
-        Audio, //音效
-        Font, //字体
-        Asset, //asset (ScriptableObject, Config, etc.)
-        Material, //mat
-        Scenes, //场景
-    }
-
-    public enum ResTypeByScene
-    {
-        Global, // 全局常驻资源
-        Level1, // 示例：关卡1资源
-        // Level2, 
-        // Battle,
-    }
-
-    /// <summary>
     /// 资源管理器
     /// 职责：统一负责基于 Addressables 的资源加载与卸载。
     /// 特色：
@@ -175,6 +151,11 @@ namespace Game.Runtime.Hotfix
                     {
                         m_CacheDic[targetScope][path] = op.Result;
                     }
+                    else
+                    {
+                        // 必须释放掉本次加载产生的引用，否则会导致 Addressables 引用计数泄露，资源永远无法卸载。
+                        Addressables.Release(op.Result);
+                    }
                     callback(op.Result);
                 }
                 else
@@ -235,6 +216,9 @@ namespace Game.Runtime.Hotfix
             {
                 ClearSceneRes(CurrentTypeBySceneType);
             }
+            
+            // 推送事件要切换场景了
+            Global.gApp.gDispatcherMgr.Dispatch(EventDefine.LoadingScene,CurrentTypeBySceneType,newSceneType);
 
             CurrentTypeBySceneType = newSceneType;
 

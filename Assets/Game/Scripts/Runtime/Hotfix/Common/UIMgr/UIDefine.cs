@@ -26,15 +26,11 @@ namespace Game.Runtime.Hotfix
         public ResTypeByScene ResTypeByScene;      // 资源归属场景
         public bool ClickMaskClose;        // 是否开启点击遮罩关闭
         public bool KeepCached;            // 是否缓存实例
-
-        public UIConfig()
-        {
-        }
+        
     }
     
     /// <summary>
     /// UI 异步加载句柄
-    /// 作用：提供类似于 Task/Promise 的回调机制，让业务层可以在 UI 加载完成后获取实例
     /// </summary>
     /// <typeparam name="T">UIBase 的具体类型</typeparam>
     public class UIHandle<T> where T : UIBase
