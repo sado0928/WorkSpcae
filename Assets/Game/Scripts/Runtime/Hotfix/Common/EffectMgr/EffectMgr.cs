@@ -50,10 +50,10 @@ namespace Game.Runtime.Hotfix
         /// </summary>
         /// <param name="assetPath">地址</param>
         /// <param name="parent">挂点</param>
-        /// <param name="duration">持续时间</param>
         /// <param name="isLoop">是否循环,循环的情况下持续时间不生效</param>
+        /// <param name="duration">持续时间</param>
         /// <returns></returns>
-        public EffectHandle PlayEffect(string assetPath, Transform parent = null, float duration = -1f, bool isLoop = false)
+        public EffectHandle PlayEffect(string assetPath, Transform parent = null, bool isLoop = false,float duration = -1f)
         {
             EffectHandle handle = new EffectHandle(assetPath);
             m_ActiveHandles.Add(handle);

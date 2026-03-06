@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.Runtime.Hotfix
 {
@@ -56,13 +57,14 @@ namespace Game.Runtime.Hotfix
 
         // sorting设置
         public int m_OrderDefalut { get; private set; } = 0;
-        public int m_OrderStep { get; private set; } = 5;
+        public int m_OrderStep { get; private set; } = 100;
         public float m_DistanceDefault { get; private set; } = 200f;
         public float m_DistanceStep { get; private set; } = 5f;
         
         public float m_DistanceMin { get; private set; } = 0f;
         // 动态引用的组件
         public Canvas m_RootCanvas { get; private set; }
+        public CanvasScaler m_RootCanvasScaler { get; private set; }
         public Camera m_UICamera { get; private set; }
 
         // --- 托管队列加载相关 ---
@@ -87,6 +89,14 @@ namespace Game.Runtime.Hotfix
             {
                 Debug.LogError("[UIMgr] KeepNode must have a Canvas component for reference!");
             }
+            
+            CanvasScaler canvasScaler = m_RootCanvas.GetComponent<CanvasScaler>();
+            if (canvasScaler == null)
+            {
+                Debug.LogError("[UIMgr] KeepNode must have a CanvasScaler component for reference!");
+            }
+
+            m_RootCanvasScaler = canvasScaler.GetComponent<CanvasScaler>();
             
             m_UICamera = m_App.gUICamera;
             if (m_UICamera == null)
@@ -496,7 +506,7 @@ namespace Game.Runtime.Hotfix
                 finalOrder = m_LayerBaseOrder[config.Layer];
                 finalDistance = m_LayerBaseDistance[config.Layer];
             }
-            // 将参数传进去，让 UIBase 为每个子 Canvas 独立计算 Distance
+            ui.SetCanvasSetting();
             ui.SetAddSorting(finalOrder, finalDistance);
         }
 

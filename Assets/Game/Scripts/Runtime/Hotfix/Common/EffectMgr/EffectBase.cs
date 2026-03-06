@@ -58,6 +58,38 @@ namespace Game.Runtime.Hotfix
             if (m_MaxDuration <= 0) m_MaxDuration = 0.1f;
         }
 
+        #region  设置渲染相关
+
+        public void SetGameObjectLayer(int layer)
+        {
+            var transforms = GetComponentsInChildren<Transform>(true);
+            foreach (var tr in transforms)
+            {
+                tr.gameObject.layer = layer;
+            }
+        }
+
+        public void SetSortingLayer(int layerId)
+        {
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            foreach (var ren in renderers)
+            {
+                ren.sortingLayerID = layerId;
+            }
+        } 
+       
+        public void SetSortingOrder(int order)
+        {
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            foreach (var ren in renderers)
+            {
+                ren.sortingOrder = order;
+            }
+        }
+
+        #endregion
+       
+
         protected override void OnSpawn()
         {
             ApplyConfig(Global.gApp.gEffectMgr.CurrentConfig);

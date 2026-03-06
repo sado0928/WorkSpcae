@@ -5,7 +5,14 @@ namespace Game.Runtime.Hotfix
 {
     public partial class HelpUI
     {
-        protected override void OnInit() { }
-        protected override void OnClose() { }
+        protected override void OnInit()
+        {
+            
+        }
+
+        protected override void OnClose()
+        {
+            
+        }
     }
 }

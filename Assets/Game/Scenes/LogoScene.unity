@@ -761,12 +761,9 @@ MonoBehaviour:
   infoText: {fileID: 253977010}
   versionText: {fileID: 1632219935}
   serverRoot: http://localhost:8888/
-  aotMetaAssemblyNames:
-  - mscorlib.dll
-  - System.dll
-  - System.Core.dll
-  - UnityEngine.CoreModule.dll
   hotfixAssemblyName: Game.Runtime.Hotfix.dll
+  gameEntryName: Game.Runtime.Hotfix.GameEntry
+  gameEntryStartFuncName: StartGame
 --- !u!4 &1260506931
 Transform:
   m_ObjectHideFlags: 0

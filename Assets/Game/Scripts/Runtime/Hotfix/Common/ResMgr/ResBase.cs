@@ -18,9 +18,15 @@ namespace Game.Runtime.Hotfix
 
         // 动态资源追踪表：记录本对象生命周期内通过该脚本加载的所有资源路径
         private Dictionary<string, ResType> m_LoadedAssets = new Dictionary<string, ResType>();
-        // 托管特效列表：UI 销毁时自动回收关联特效
-        private List<EffectHandle> m_ManagedEffects = new List<EffectHandle>();
-
+        
+        // 托管特效列表：UI 销毁时自动回收关联特效 key => instanceID
+        private Dictionary<int,EffectHandle> m_EffectDic = new Dictionary<int,EffectHandle>();
+        private List<EffectHandle> m_EffectList = new List<EffectHandle>();
+        
+        // 动态特效的order管理 key => instanceID
+        private Dictionary<int, int> m_EffectOrderDic = new Dictionary<int, int>();
+        private int m_EffectOrderStep = 5;
+        
         #region 资源加载接口 (Simplified API)
 
         /// <summary>
@@ -29,11 +35,63 @@ namespace Game.Runtime.Hotfix
         /// <param name="path">特效资源路径</param>
         /// <param name="parent">挂点，默认为当前 UI</param>
         /// <returns></returns>
-        public EffectHandle PlayEffect(string path, Transform parent,float duration = -1f, bool isLoop = false)
+        public EffectHandle PlayEffect(string path, Transform parent,bool isLoop = false,float duration = -1f )
         {
-            if (string.IsNullOrEmpty(path)) return null;
-            var handle = Global.gApp.gEffectMgr.PlayEffect(path, parent,duration,isLoop);
-            m_ManagedEffects.Add(handle);
+            if (string.IsNullOrEmpty(path))
+            {
+                Global.LogError("error by ResBase function for PlayEffect , path is empty");
+                return null;
+            }
+            if (parent == null)
+            {
+                Global.LogError("error by ResBase function for PlayEffect , parent is empty");
+                return null;
+            }
+            
+            // 如果是同一个父节点需要清理一下老特效
+            int parentId = parent.GetInstanceID();
+            int parentLayer = parent.gameObject.layer;
+            if (m_EffectDic.TryGetValue(parentId,out EffectHandle effectHandle))
+            {
+                m_EffectDic.Remove(parentId);
+                m_EffectList.Remove(effectHandle);
+                effectHandle.Dispose();
+            }
+            
+            // 向上查找第一个 Canvas 
+            Canvas canvas = parent.GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Global.LogError("error by ResBase function for PlayEffect , parent canvas is not found");
+                return null;
+            }
+
+            int sortingOrder = 0;
+            int canvasId = canvas.GetInstanceID();
+            if (!m_EffectOrderDic.ContainsKey(canvasId))
+            {
+                m_EffectOrderDic.Add(canvasId,canvas.sortingOrder);
+            }
+
+            if (m_EffectOrderDic.TryGetValue(canvasId,out int order))
+            {
+                int nextOrder = order + m_EffectOrderStep;
+                sortingOrder = nextOrder;
+                m_EffectOrderDic[canvasId] = nextOrder;
+            }
+            
+            EffectHandle handle = Global.gApp.gEffectMgr.PlayEffect(path, parent,isLoop,duration);
+            handle.SetCallback((effectHandle) =>
+            {
+                if (effectHandle != null && canvas != null)
+                {
+                    effectHandle.m_EffectBase.SetGameObjectLayer(parentLayer);
+                    effectHandle.m_EffectBase.SetSortingOrder(sortingOrder);
+                }
+            });
+
+            m_EffectDic.Add(parentId,handle);
+            m_EffectList.Add(handle);
             return handle;
         }
 
@@ -139,14 +197,16 @@ namespace Game.Runtime.Hotfix
         
         private void DisposeEffect()
         {
-            if (m_ManagedEffects != null)
+            if (m_EffectList != null)
             {
-                foreach (var handle in m_ManagedEffects)
+                foreach (var handle in m_EffectList)
                 {
                     if (handle != null) handle.Dispose();
                 }
-                m_ManagedEffects.Clear();
+                m_EffectList.Clear();
             }
+            m_EffectDic.Clear();
+            m_EffectOrderDic.Clear();
         }
         protected virtual void OnDestroy()
         {

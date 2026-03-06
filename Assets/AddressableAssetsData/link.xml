@@ -14,6 +14,7 @@
     <type fullname="Game.Runtime.Hotfix.MainUI/RectTransform_MainUI_MenuItem_Container" preserve="nothing" serialized="true" />
     <type fullname="Game.Runtime.Hotfix.RectTransform_Container" preserve="nothing" serialized="true" />
     <type fullname="Game.Runtime.Hotfix.RectTransform_Image_Button_Container" preserve="nothing" serialized="true" />
+    <type fullname="Game.Runtime.Hotfix.RectTransform_Image_Container" preserve="nothing" serialized="true" />
     <type fullname="Game.Runtime.Hotfix.RectTransform_Text_Container" preserve="nothing" serialized="true" />
   </assembly>
   <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
@@ -66,6 +67,10 @@
     <type fullname="UnityEngine.Transform" preserve="all" />
     <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
     <type fullname="UnityEngine.RectOffset" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.ParticleSystem" preserve="all" />
+    <type fullname="UnityEngine.ParticleSystemRenderer" preserve="all" />
   </assembly>
   <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.Font" preserve="all" />

@@ -6,8 +6,11 @@ namespace Game.Runtime.Hotfix
     {
         public override void OnEnter()
         {
-            Global.gApp.gUIMgr.OpenUIAsync(UIDefine.MainUI);
-            Global.gApp.gAudioMgr.PlayBGM(AudioDefine.MainBgm,false);
+            Global.gApp.gUIMgr.OpenUIAsync<MainUI>(UIDefine.MainUI).SetCallback(ui =>
+            {
+                Global.gApp.gDispatcherMgr.Dispatch(EventDefine.LoadingFinish,true);
+                Global.gApp.gAudioMgr.PlayBGM(AudioDefine.MainBgm,false);
+            });
         }
 
         public override void OnUpdate(float dt)

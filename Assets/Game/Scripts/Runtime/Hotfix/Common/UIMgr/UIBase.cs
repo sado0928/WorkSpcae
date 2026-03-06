@@ -23,6 +23,7 @@ namespace Game.Runtime.Hotfix
         // Canvas 管理 (使用并行列表简化结构)
         private List<Canvas> m_SubCanvases = new List<Canvas>();
 
+        private List<CanvasScaler> m_SubCanvasScalers = new List<CanvasScaler>();
         // 定时器
         private List<int> m_TimerIds = new List<int>();
         private List<int> m_FrameTimerIds = new List<int>();
@@ -74,6 +75,25 @@ namespace Game.Runtime.Hotfix
                 Debug.LogError($"[UIBase] No Canvas found in children of '{name}'! UI will not render correctly.");
                 return;
             }
+            // 获取所有子节点中的 CanvasScaler (不包括根节点)
+            CanvasScaler[] childCanvasScalers = GetComponentsInChildren<CanvasScaler>(true);
+
+            // 过滤掉误挂在根节点的 CanvasScaler (如果有)
+            m_SubCanvasScalers.Clear();
+            
+            foreach (var c in childCanvasScalers)
+            {
+                if (c.gameObject != this.gameObject) 
+                {
+                    m_SubCanvasScalers.Add(c);
+                }
+            }
+
+            if (m_SubCanvasScalers.Count == 0)
+            {
+                Debug.LogError($"[UIBase] No Canvas found in children of '{name}'! UI will not render correctly.");
+                return;
+            }
             
         }
 
@@ -84,6 +104,7 @@ namespace Game.Runtime.Hotfix
 
             // 2. 清理 UI 特有的引用
             m_SubCanvases.Clear();
+            m_SubCanvasScalers.Clear();
             m_TimerIds.Clear();
             m_FrameTimerIds.Clear();
         }
@@ -125,6 +146,37 @@ namespace Game.Runtime.Hotfix
         public virtual void OnRefresh(string val){}
         public virtual void OnRefresh(UIDataBase val){}
 
+        public void SetCanvasSetting()
+        {
+            // 获取 Root Canvas 的参考分辨率 (如果存在)
+            var rootCanvas = Global.gApp.gUIMgr.m_RootCanvas;
+            if (rootCanvas == null) return;
+            
+            var rootScaler = Global.gApp.gUIMgr.m_RootCanvasScaler;
+            if (rootScaler == null) return;
+            
+            Vector2 refResolution = rootScaler.referenceResolution;
+            // 设置 RenderMode 和 Camera
+            foreach (var canvas in m_SubCanvases)
+            {
+                if (canvas.renderMode != RenderMode.WorldSpace)
+                {
+                    var uiCamera = Global.gApp.gUIMgr.m_UICamera;
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = uiCamera;
+                }
+            }
+            foreach (var canvasScaler in m_SubCanvasScalers)
+            {
+                if (canvasScaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
+                {
+                    canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                }
+                // 同步参考分辨率
+                canvasScaler.referenceResolution = refResolution;
+            }
+        }
+
         /// <summary>
         /// 统一设置所有子 Canvas 的排序、距离和相机
         /// </summary>
@@ -137,19 +189,11 @@ namespace Game.Runtime.Hotfix
             {
                 if (canvas != null)
                 {
-                    // 1. 设置 Order 
+                    //设置 Order 
                     m_FinalOrder = order + orderStep;
                     canvas.sortingOrder = m_FinalOrder;
                     
-                    // 2. 设置 RenderMode 和 Camera
-                    if (canvas.renderMode != RenderMode.WorldSpace)
-                    {
-                        var uiCamera = Global.gApp.gUIMgr.m_UICamera;
-                        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                        canvas.worldCamera = uiCamera;
-                    }
-                    
-                    // 3. 独立计算每个 SubCanvas 的 Distance
+                    //独立计算每个 SubCanvas 的 Distance
                     m_FinalDistance = distance - distanceStep;
                     canvas.planeDistance = m_FinalDistance;
                 }
@@ -168,19 +212,11 @@ namespace Game.Runtime.Hotfix
             {
                 if (canvas != null)
                 {
-                    // 1. 设置 Order 
+                    // 设置 Order 
                     m_FinalOrder = order - orderStep;
                     canvas.sortingOrder = m_FinalOrder;
                     
-                    // 2. 设置 RenderMode 和 Camera
-                    if (canvas.renderMode != RenderMode.WorldSpace)
-                    {
-                        var uiCamera = Global.gApp.gUIMgr.m_UICamera;
-                        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                        canvas.worldCamera = uiCamera;
-                    }
-                    
-                    // 3. 独立计算每个 SubCanvas 的 Distance
+                    // 独立计算每个 SubCanvas 的 Distance
                     m_FinalDistance = distance + distanceStep;
                     canvas.planeDistance = m_FinalDistance;
                 }

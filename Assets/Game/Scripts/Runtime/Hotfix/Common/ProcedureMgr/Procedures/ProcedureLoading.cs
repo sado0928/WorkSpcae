@@ -5,8 +5,8 @@ namespace Game.Runtime.Hotfix
     public class ProcedureLoading : ProcedureBase
     {
         private float m_Progress;
-        private bool m_IsLoadingScene;
-        private bool m_IsSceneLoaded;
+        private bool m_IsLoadingScene; // 加载场景中
+        private bool m_IsSceneLoaded; // 场景加载完毕
         
         // 假进度参数
         private float m_FakeProgressSpeed = 1.0f; // 1秒走完假进度
@@ -18,7 +18,9 @@ namespace Game.Runtime.Hotfix
             m_Progress = 0f;
             m_IsLoadingScene = false;
             m_IsSceneLoaded = false;
-
+            
+            Global.gApp.gDispatcherMgr.AddEventListener<bool>(EventDefine.LoadingFinish,OnLoadingFinish);
+            
             // 1. 打开 Loading UI，并等待其加载完成
             Global.gApp.gUIMgr.OpenUIAsync<LoadingUI>(UIDefine.LoadingUI).SetCallback((ui) =>
             {
@@ -78,7 +80,7 @@ namespace Game.Runtime.Hotfix
                 loadingUI.SetProgress(m_Progress);
             }
         }
-
+        
         private void FinishLoading()
         {
             // 防止重复调用
@@ -89,12 +91,18 @@ namespace Game.Runtime.Hotfix
             Global.gApp.gProcedureMgr.OnLoadingComplete();
         }
 
-        public override void OnLeave()
+        private void OnLoadingFinish(bool isFinish)
         {
             // 关闭 Loading UI
             Global.gApp.gUIMgr.CloseUI(UIDefine.LoadingUI);
+            Global.gApp.gDispatcherMgr.RemoveEventListener<bool>(EventDefine.LoadingFinish,OnLoadingFinish);
         }
-
+        
+        public override void OnLeave()
+        {
+            
+        }
+        
         public override void OnDestroy()
         {
         }

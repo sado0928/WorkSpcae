@@ -166,6 +166,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2282479014113920643}
+  - {fileID: 5938940364632822755}
   m_Father: {fileID: 414572843222958631}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -248,7 +249,7 @@ GameObject:
   - component: {fileID: 8131524163009637271}
   - component: {fileID: 4220397481563728809}
   m_Layer: 5
-  m_Name: Bg
+  m_Name: m_Bg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -312,6 +313,41 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &3713919172203900795
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5938940364632822755}
+  m_Layer: 5
+  m_Name: m_Eff
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5938940364632822755
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3713919172203900795}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4833722985745279524}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4839730355213899487
 GameObject:
   m_ObjectHideFlags: 0
@@ -361,3 +397,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e82b3a5bc678b94a9ea0201102159e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Bg:
+    m_gameObject: {fileID: 2541459200483566700}
+    m_rectTransform: {fileID: 2282479014113920643}
+    m_image: {fileID: 4220397481563728809}
+  m_Eff:
+    m_gameObject: {fileID: 3713919172203900795}
+    m_rectTransform: {fileID: 5938940364632822755}
