@@ -7,8 +7,10 @@
   <assembly fullname="netstandard" preserve="all" />
   <assembly fullname="Unity.Addressables" preserve="all" />
   <assembly fullname="Unity.ResourceManager" preserve="all" />
+  <assembly fullname="UnityEngine.AnimationModule" preserve="all" />
   <assembly fullname="UnityEngine.AudioModule" preserve="all" />
   <assembly fullname="UnityEngine.InputLegacyModule" preserve="all" />
+  <assembly fullname="UnityEngine.ParticleSystemModule" preserve="all" />
   <assembly fullname="UnityEngine.TextRenderingModule" preserve="all" />
   <assembly fullname="UnityEngine.UI" preserve="all" />
   <assembly fullname="UnityEngine.UIModule" preserve="all" />

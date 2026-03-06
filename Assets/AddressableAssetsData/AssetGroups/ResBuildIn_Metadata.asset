@@ -41,8 +41,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c390b6463989df4f8d1dc28bf42086c
+    m_Address: Metadata/UnityEngine.AnimationModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c45748829d1bf14dbe914f598d3c496
     m_Address: Metadata/System.Core.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8c600ed52defe424c92864ac8110ee47
+    m_Address: Metadata/UnityEngine.ParticleSystemModule.dll.bytes
     m_ReadOnly: 0
     m_SerializedLabels:
     - default
