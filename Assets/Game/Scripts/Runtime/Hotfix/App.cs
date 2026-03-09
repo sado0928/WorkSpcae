@@ -10,6 +10,7 @@ namespace Game.Runtime.Hotfix
         public Camera gUICamera { get; private set; }
         public DispatcherMgr gDispatcherMgr { get; set; }
         public ResMgr gResMgr { get; private set; }
+        public CfgMgr gCfgMgr { get; private set; }
         public TimerMgr gTimerMgr { get; private set; }
         public FrameTimerMgr gFrameTimerMgr { get; private set; }
         public AudioMgr gAudioMgr { get; private set; }
@@ -31,6 +32,7 @@ namespace Game.Runtime.Hotfix
             // 初始化管理类
             gDispatcherMgr = new DispatcherMgr();
             gResMgr = new ResMgr();
+            gCfgMgr = new CfgMgr();
             gTimerMgr = new TimerMgr();
             gFrameTimerMgr = new FrameTimerMgr();
             gPoolMgr = new PoolMgr();

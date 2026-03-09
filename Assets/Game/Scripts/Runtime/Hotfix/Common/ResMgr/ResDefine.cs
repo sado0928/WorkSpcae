@@ -12,6 +12,7 @@
         Audio, //音效
         Font, //字体
         Asset, //asset (ScriptableObject, Config, etc.)
+        Bytes, //bytes
         Material, //mat
         Scenes, //场景
     }

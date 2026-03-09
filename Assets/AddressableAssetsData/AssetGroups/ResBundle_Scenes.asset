@@ -23,6 +23,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a26720cf94ff964286a57d8be793a6f
+    m_Address: Scenes/Level1Scene.unity
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f458678bbc0cd304d869a141045b2fb2
     m_Address: Scenes/LoadingScene.unity
     m_ReadOnly: 0

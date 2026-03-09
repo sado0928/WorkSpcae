@@ -19,11 +19,13 @@ namespace Game.Runtime.Hotfix
     {
         public const string LoadingScene = "LoadingScene";
         public const string MainScene = "MainScene";
+        public const string Level1Scene = "Level1Scene";
 
         public static Dictionary<string, ProcedureConfig> ProcedureInfo = new Dictionary<string, ProcedureConfig>()
         {
             {LoadingScene,new ProcedureConfig(){Path ="Scenes/LoadingScene",ResTypeByScene = ResTypeByScene.Global}},
             {MainScene,new ProcedureConfig(){Path ="Scenes/MainScene",ResTypeByScene = ResTypeByScene.Global}},
+            {Level1Scene,new ProcedureConfig(){Path ="Scenes/Level1Scene",ResTypeByScene = ResTypeByScene.Level1}},
         };
 
         public static ProcedureConfig GetProcedureConfig(string key)

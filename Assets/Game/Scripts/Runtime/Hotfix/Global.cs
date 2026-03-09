@@ -66,6 +66,15 @@ namespace Game.Runtime.Hotfix
             {
                 gApp.gUIMgr.LoadUIAsync<ShopUI>(UIDefine.ShopUI);
             }
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                // 启动主流程
+                gApp.gProcedureMgr.ChangeState(ProcedureDefine.Level1Scene);
+            }
+            if (Input.GetKeyDown(KeyCode.F9))
+            {
+                gApp.gProcedureMgr.ChangeState(ProcedureDefine.MainScene);
+            }
         }
     
         private void OnDestroy()

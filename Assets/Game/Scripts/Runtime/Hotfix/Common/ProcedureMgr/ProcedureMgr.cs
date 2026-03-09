@@ -19,6 +19,7 @@ namespace Game.Runtime.Hotfix
             // 注册流程
             AddProcedure(ProcedureDefine.LoadingScene, new ProcedureLoading());
             AddProcedure(ProcedureDefine.MainScene, new ProcedureMain());
+            AddProcedure(ProcedureDefine.Level1Scene, new ProcedureLevel1());
         }
         
         public void AddProcedure(string key, ProcedureBase procedure)

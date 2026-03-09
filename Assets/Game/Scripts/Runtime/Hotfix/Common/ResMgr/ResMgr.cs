@@ -40,6 +40,7 @@ namespace Game.Runtime.Hotfix
                 { ResType.Audio, "{0}.mp3" },
                 { ResType.Font, "{0}.ttf" },
                 { ResType.Asset, "{0}.asset" },
+                { ResType.Bytes, "{0}.bytes" },
                 { ResType.Material, "{0}.mat" },
                 { ResType.Scenes, "{0}.unity" }
             };
@@ -301,6 +302,11 @@ namespace Game.Runtime.Hotfix
         public ScriptableObject LoadScriptableObject(string path, bool forceGlobal = false)
         {
             return LoadAsset<ScriptableObject>(path, ResType.Asset, forceGlobal);
+        } 
+        
+        public TextAsset LoadTextAsset(string path, bool forceGlobal = false)
+        {
+            return LoadAsset<TextAsset>(path, ResType.Bytes, forceGlobal);
         }
 
         // --- 异步封装接口 ---
@@ -338,6 +344,11 @@ namespace Game.Runtime.Hotfix
         public void LoadScriptableObjectAsync(string path, Action<ScriptableObject> callback, bool forceGlobal = false)
         {
             LoadAssetAsync<ScriptableObject>(path, ResType.Asset, callback, forceGlobal);
+        }
+        
+        public void LoadTextAssetAsync(string path, Action<TextAsset> callback, bool forceGlobal = false)
+        {
+            LoadAssetAsync<TextAsset>(path, ResType.Asset, callback, forceGlobal);
         }
         
         /// <summary>
