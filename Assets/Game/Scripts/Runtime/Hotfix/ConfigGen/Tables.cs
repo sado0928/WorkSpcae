@@ -13,16 +13,23 @@ namespace Game.Runtime.Hotfix
 {
 public partial class Tables
 {
+    public Tbhero Tbhero {get; }
     public Tbitem Tbitem {get; }
 
-    public Tables(System.Func<string, ByteBuf> loader)
+	public System.Collections.Generic.Dictionary<string, ICfgAble> AllData {get;private set;} = new System.Collections.Generic.Dictionary<string, ICfgAble>();
+    
+	public Tables(System.Func<string, ByteBuf> loader)
     {
+        Tbhero = new Tbhero(loader("tbhero"));
+        AllData.Add(Tbhero.CfgName,Tbhero);
         Tbitem = new Tbitem(loader("tbitem"));
+        AllData.Add(Tbitem.CfgName,Tbitem);
         ResolveRef();
     }
     
     private void ResolveRef()
     {
+        Tbhero.ResolveRef(this);
         Tbitem.ResolveRef(this);
     }
 }

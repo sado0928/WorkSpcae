@@ -4,7 +4,11 @@ namespace Game.Runtime.Hotfix
     {
         void OnIUpdate(float dt);
     }
-    
+
+    public interface ICfgAble
+    {
+    }
+
     public class InterFaceDefine
     {
         

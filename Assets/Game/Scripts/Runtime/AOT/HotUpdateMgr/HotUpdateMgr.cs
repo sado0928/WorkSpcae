@@ -410,7 +410,7 @@ namespace Game.Runtime.AOT
 
         private void LaunchGame()
         {
-            UpdateUI(1f, "准备就绪...");
+            UpdateUI(1f, "即将准备就绪...");
             try {
                 string assemblyName = hotfixAssemblyName.Replace(".dll", "");
                 string typeName = $"{gameEntryName}, {assemblyName}";

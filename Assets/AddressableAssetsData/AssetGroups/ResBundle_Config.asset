@@ -17,6 +17,12 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 520dee5a042da17489304fafc1242457
   m_SerializeEntries:
+  - m_GUID: 8d7d061afd9aab04395f1cb51d8429cc
+    m_Address: Config/tbhero.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d5aaf312f24699146b05237d7a60296f
     m_Address: Config/tbitem.bytes
     m_ReadOnly: 0

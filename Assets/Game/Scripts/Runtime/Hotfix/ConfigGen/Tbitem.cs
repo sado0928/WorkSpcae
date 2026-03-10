@@ -12,12 +12,15 @@ using Luban;
 
 namespace Game.Runtime.Hotfix
 {
-public partial class Tbitem
+public partial class Tbitem : ICfgAble
 {
     private readonly System.Collections.Generic.Dictionary<int, item> _dataMap;
     private readonly System.Collections.Generic.List<item> _dataList;
     
-    public Tbitem(ByteBuf _buf)
+	public static string CfgName = "Tbitem";
+	public static Tbitem Data{ get { return Global.gApp.gCfgMgr.GetData<Tbitem>(CfgName); } }
+    
+	public Tbitem(ByteBuf _buf)
     {
         int n = _buf.ReadSize();
         _dataMap = new System.Collections.Generic.Dictionary<int, item>(n);

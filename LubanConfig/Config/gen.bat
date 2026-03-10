@@ -1,7 +1,7 @@
 set WORKSPACE=..
 set LUBAN_DLL=%WORKSPACE%\Tools\Luban\Luban.dll
 set CONF_ROOT=.
-set CODE_OUT_PATH=..\..\Assets\Game\Scripts\Runtime\Hotfix\Config
+set CODE_OUT_PATH=..\..\Assets\Game\Scripts\Runtime\Hotfix\ConfigGen
 set DATA_OUT_PATH=..\..\Assets\ResBundle\Config
 
 dotnet %LUBAN_DLL% ^

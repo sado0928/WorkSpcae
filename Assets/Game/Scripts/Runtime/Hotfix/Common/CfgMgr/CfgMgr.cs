@@ -1,4 +1,5 @@
-﻿using Luban;
+﻿using System.Collections.Generic;
+using Luban;
 using UnityEngine;
 
 namespace Game.Runtime.Hotfix
@@ -24,6 +25,11 @@ namespace Game.Runtime.Hotfix
             }
         
             return new ByteBuf(asset.bytes);
+        }
+        
+        public T GetData<T>(string key) where T: class, ICfgAble
+        {
+            return Tables.AllData[key] as T;
         }
     }
 }

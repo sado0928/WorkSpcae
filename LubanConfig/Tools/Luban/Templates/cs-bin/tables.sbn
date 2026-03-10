@@ -12,11 +12,14 @@ public partial class {{__name}}
     public {{table.full_name}} {{format_property_name __code_style table.name}} {get; }
     {{~end~}}
 
-    public {{__name}}(System.Func<string, ByteBuf> loader)
+	public System.Collections.Generic.Dictionary<string, ICfgAble> AllData {get;private set;} = new System.Collections.Generic.Dictionary<string, ICfgAble>();
+    
+	public {{__name}}(System.Func<string, ByteBuf> loader)
     {
         {{~for table in __tables ~}}
         {{format_property_name __code_style table.name}} = new {{table.full_name}}(loader("{{table.output_data_file}}"));
-        {{~end~}}
+        AllData.Add({{table.full_name}}.CfgName,{{table.full_name}});
+ 	    {{~end~}}
         ResolveRef();
     }
     
