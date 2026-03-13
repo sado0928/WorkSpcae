@@ -127,10 +127,10 @@ namespace Game.Runtime.Hotfix
         {
             if (go == null) return;
 
-            PoolItemIdentity identity = go.GetComponent<PoolItemIdentity>();
-            if (identity != null)
+            PoolItem poolItem = go.GetComponent<PoolItem>();
+            if (poolItem != null)
             {
-                string key = identity.AssetPath;
+                string key = poolItem.AssetPath;
                 if (m_PoolActiveLists.TryGetValue(key, out var activeList))
                 {
                     if (activeList.Contains(go))
@@ -169,9 +169,9 @@ namespace Game.Runtime.Hotfix
             GameObject go = Global.gApp.gResMgr.Instantiate(prefab, parent);
             
             // 补齐身份标识（用于 Despawn 回溯）
-            var identity = go.GetComponent<PoolItemIdentity>();
-            if (identity == null) identity = go.AddComponent<PoolItemIdentity>();
-            identity.AssetPath = key;
+            var poolItem = go.GetComponent<PoolItem>();
+            if (poolItem == null) poolItem = go.AddComponent<PoolItem>();
+            poolItem.AssetPath = key;
 
             // 核心修复：根据泛型类型动态挂载组件，而不是添加抽象类
             var poolBase = go.GetComponent(componentType) as PoolBase;
@@ -182,7 +182,7 @@ namespace Game.Runtime.Hotfix
 
             if (poolBase != null)
             {
-                poolBase.OnInit(key, currentScope);
+                poolBase.InternalOnInit(key, currentScope);
             }
             else
             {

@@ -8,6 +8,7 @@ namespace Game.Runtime.Hotfix
         public Transform m_KeepNode { get; private set; }
         public Canvas gCanvas { get; private set; }
         public Camera gUICamera { get; private set; }
+        public Camera gWorldCamera { get; private set; }
         public DispatcherMgr gDispatcherMgr { get; set; }
         public ResMgr gResMgr { get; private set; }
         public CfgMgr gCfgMgr { get; private set; }
@@ -17,6 +18,8 @@ namespace Game.Runtime.Hotfix
         public UIMgr gUIMgr { get; private set; }
         public PoolMgr gPoolMgr { get; private set; }
         public EffectMgr gEffectMgr { get; private set; }
+        public BattleMgr gBattleMgr { get; private set; }
+        public EntityMgr gEntityMgr { get; private set; }
         public ProcedureMgr gProcedureMgr { get; private set; }
 
         public void OnAwake(Global global)
@@ -25,6 +28,7 @@ namespace Game.Runtime.Hotfix
             m_KeepNode = gGlobal.transform.parent.transform;
             gCanvas = m_KeepNode.transform.Find("Canvas").GetComponent<Canvas>();
             gUICamera = m_KeepNode.transform.Find("CameraNode/UICamera").GetComponent<Camera>();
+            gWorldCamera = m_KeepNode.transform.Find("CameraNode/WorldCamera").GetComponent<Camera>();
         }
 
         public void OnStart()
@@ -39,16 +43,18 @@ namespace Game.Runtime.Hotfix
             gEffectMgr = new EffectMgr();
             gAudioMgr = new AudioMgr();
             gUIMgr = new UIMgr();
+            gBattleMgr = new BattleMgr();
+            gEntityMgr = new EntityMgr();
 
             // 初始化流程管理器
             gProcedureMgr = new ProcedureMgr();
 
             Debug.Log("=== Hotfix: App Started, Managers Initialized ===");
-
+            
             // 启动主流程
             gProcedureMgr.ChangeState(ProcedureDefine.MainScene);
         }
-
+        
         public void OnIUpdate(float dt)
         {
             if (gTimerMgr != null) gTimerMgr.OnIUpdate(dt);
@@ -56,6 +62,8 @@ namespace Game.Runtime.Hotfix
             if (gAudioMgr != null) gAudioMgr.OnIUpdate(dt);
             if (gUIMgr != null) gUIMgr.OnIUpdate(dt);
             if (gEffectMgr != null) gEffectMgr.OnIUpdate(dt);
+            if (gBattleMgr != null) gBattleMgr.OnIUpdate(dt);
+            if (gEntityMgr != null) gEntityMgr.OnIUpdate(dt);
             if (gProcedureMgr != null) gProcedureMgr.OnIUpdate(dt);
         }
 
@@ -66,6 +74,8 @@ namespace Game.Runtime.Hotfix
             if (gResMgr != null) gResMgr.OnDestroy();
             if (gPoolMgr != null) gPoolMgr.OnDestroy();
             if (gEffectMgr != null) gEffectMgr.OnDestroy();
+            if (gBattleMgr != null) gBattleMgr.OnDestroy();
+            if (gEntityMgr != null) gEntityMgr.OnDestroy();
         }
     }
 }

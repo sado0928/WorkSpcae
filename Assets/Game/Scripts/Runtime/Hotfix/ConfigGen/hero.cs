@@ -19,6 +19,10 @@ public sealed partial class hero : Luban.BeanBase
         Id = _buf.ReadInt();
         Name = _buf.ReadString();
         Desc = _buf.ReadString();
+        ResKey = _buf.ReadString();
+        Hp = _buf.ReadInt();
+        Atk = _buf.ReadInt();
+        Speed = _buf.ReadFloat();
     }
 
     public static hero Deserializehero(ByteBuf _buf)
@@ -38,6 +42,22 @@ public sealed partial class hero : Luban.BeanBase
     /// 描述
     /// </summary>
     public readonly string Desc;
+    /// <summary>
+    /// 资源地址
+    /// </summary>
+    public readonly string ResKey;
+    /// <summary>
+    /// 血量
+    /// </summary>
+    public readonly int Hp;
+    /// <summary>
+    /// 攻击
+    /// </summary>
+    public readonly int Atk;
+    /// <summary>
+    /// 速度
+    /// </summary>
+    public readonly float Speed;
    
     public const int __ID__ = 3198970;
     public override int GetTypeId() => __ID__;
@@ -52,6 +72,10 @@ public sealed partial class hero : Luban.BeanBase
         + "id:" + Id + ","
         + "name:" + Name + ","
         + "desc:" + Desc + ","
+        + "resKey:" + ResKey + ","
+        + "hp:" + Hp + ","
+        + "atk:" + Atk + ","
+        + "speed:" + Speed + ","
         + "}";
     }
 }

@@ -23,8 +23,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d5aaf312f24699146b05237d7a60296f
-    m_Address: Config/tbitem.bytes
+  - m_GUID: df52292f18158d04ea6201a3b0884341
+    m_Address: Config/tbmonster.bytes
     m_ReadOnly: 0
     m_SerializedLabels:
     - default

@@ -31,7 +31,7 @@ namespace Game.Runtime.Hotfix
 
             foreach (var handle in m_ActiveHandles)
             {
-                if (handle.IsLoaded) handle.m_EffectBase.ApplyConfig(CurrentConfig);
+                if (handle.IsLoaded) handle.m_Base.ApplyConfig(CurrentConfig);
             }
             
             Debug.Log($"[EffectMgr] Quality Switched to: {key}");
@@ -83,7 +83,7 @@ namespace Game.Runtime.Hotfix
             return handle;
         }
         
-        public void DisposeEffect(EffectHandle handle)
+        public void Dispose(EffectHandle handle)
         {
             if (handle == null) return;
             if (m_ActiveHandles.Contains(handle))
@@ -91,7 +91,7 @@ namespace Game.Runtime.Hotfix
                 m_ActiveHandles.Remove(handle);
                 if (handle.IsLoaded)
                 {
-                    Global.gApp.gPoolMgr.Despawn(handle.EffectGo);
+                    Global.gApp.gPoolMgr.Despawn(handle.m_GameObject);
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Game.Runtime.Hotfix
         public void OnDestroy()
         {
             var list = new List<EffectHandle>(m_ActiveHandles);
-            foreach (var h in list) DisposeEffect(h);
+            foreach (var h in list) Dispose(h);
             m_ActiveHandles.Clear();
             if (m_EffectRoot != null) Global.gApp.gResMgr.Destroy(m_EffectRoot.gameObject);
         }
@@ -111,7 +111,7 @@ namespace Game.Runtime.Hotfix
                 // 从后往前清理超出限制的特效
                 for (int i = m_ActiveHandles.Count - 1; i >= CurrentConfig.EffectLimit; i--)
                 {
-                    DisposeEffect(m_ActiveHandles[i]);
+                    Dispose(m_ActiveHandles[i]);
                 }
             }
         }

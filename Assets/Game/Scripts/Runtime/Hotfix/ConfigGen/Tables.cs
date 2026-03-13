@@ -14,7 +14,7 @@ namespace Game.Runtime.Hotfix
 public partial class Tables
 {
     public Tbhero Tbhero {get; }
-    public Tbitem Tbitem {get; }
+    public Tbmonster Tbmonster {get; }
 
 	public System.Collections.Generic.Dictionary<string, ICfgAble> AllData {get;private set;} = new System.Collections.Generic.Dictionary<string, ICfgAble>();
     
@@ -22,15 +22,15 @@ public partial class Tables
     {
         Tbhero = new Tbhero(loader("tbhero"));
         AllData.Add(Tbhero.CfgName,Tbhero);
-        Tbitem = new Tbitem(loader("tbitem"));
-        AllData.Add(Tbitem.CfgName,Tbitem);
+        Tbmonster = new Tbmonster(loader("tbmonster"));
+        AllData.Add(Tbmonster.CfgName,Tbmonster);
         ResolveRef();
     }
     
     private void ResolveRef()
     {
         Tbhero.ResolveRef(this);
-        Tbitem.ResolveRef(this);
+        Tbmonster.ResolveRef(this);
     }
 }
 

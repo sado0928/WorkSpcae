@@ -10,8 +10,8 @@ namespace Game.Runtime.Hotfix
         public float m_MaxDuration { get; private set; } 
         private int m_LoopTimerId = -1;
         private int m_FinalDurationTimerId = -1;
-
-        private void Awake()
+        
+        protected override void OnInit()
         {
             CalculateMaxDuration();
         }

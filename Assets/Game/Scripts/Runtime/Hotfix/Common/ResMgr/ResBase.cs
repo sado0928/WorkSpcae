@@ -85,8 +85,8 @@ namespace Game.Runtime.Hotfix
             {
                 if (effectHandle != null && canvas != null)
                 {
-                    effectHandle.m_EffectBase.SetGameObjectLayer(parentLayer);
-                    effectHandle.m_EffectBase.SetSortingOrder(sortingOrder);
+                    effectHandle.m_Base.SetGameObjectLayer(parentLayer);
+                    effectHandle.m_Base.SetSortingOrder(sortingOrder);
                 }
             });
 

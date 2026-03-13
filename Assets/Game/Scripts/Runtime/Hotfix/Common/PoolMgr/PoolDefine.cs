@@ -8,7 +8,7 @@ namespace Game.Runtime.Hotfix
     /// 池对象身份标识组件
     /// 注意：此组件由 PoolMgr 内部自动补齐，外部无需关心。
     /// </summary>
-    public class PoolItemIdentity : MonoBehaviour
+    public class PoolItem : MonoBehaviour
     {
         public string AssetPath { get; set; }
     }

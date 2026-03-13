@@ -7,17 +7,17 @@ namespace Game.Runtime.Hotfix
     public class EffectHandle
     {
         public string Path { get; private set; }
-        public EffectBase m_EffectBase { get; private set; }
-        public GameObject EffectGo
+        public EffectBase m_Base { get; private set; }
+        public GameObject m_GameObject
         {
             get
             {
-                return m_EffectBase != null ? m_EffectBase.gameObject : null;
+                return  m_Base != null ? m_Base.gameObject : null;;
             }
             private set { }
         }
 
-        public bool IsLoaded => m_EffectBase != null;
+        public bool IsLoaded => m_Base != null;
 
         private Action<EffectHandle> m_Callback;
 
@@ -41,29 +41,29 @@ namespace Game.Runtime.Hotfix
 
         public void Complete(EffectBase baseComp)
         {
-            m_EffectBase = baseComp;
+            m_Base = baseComp;
             m_Callback?.Invoke(this);
             m_Callback = null;
         }
 
         public void Dispose()
         {
-            Global.gApp.gEffectMgr.DisposeEffect(this);
+            Global.gApp.gEffectMgr.Dispose(this);
         }
 
         public void SetPosition(Vector3 pos)
         {
-            if (IsLoaded) EffectGo.transform.position = pos;
+            if (IsLoaded) m_GameObject.transform.position = pos;
         }
 
         public void SetRotation(Quaternion rot)
         {
-            if (IsLoaded) EffectGo.transform.rotation = rot;
+            if (IsLoaded) m_GameObject.transform.rotation = rot;
         }
         
         public void SetParent(Transform parent, bool worldPositionStays = false)
         {
-            if (IsLoaded) EffectGo.transform.SetParent(parent, worldPositionStays);
+            if (IsLoaded) m_GameObject.transform.SetParent(parent, worldPositionStays);
         }
     }
 

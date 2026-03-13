@@ -24,10 +24,11 @@ namespace Game.Runtime.Hotfix
         /// <summary>
         /// 初始化
         /// </summary>
-        public virtual void OnInit(string key, ResTypeByScene resTypeByScene)
+        public void InternalOnInit(string key, ResTypeByScene resTypeByScene)
         {
             Path = key;
             ResTypeByScene = resTypeByScene;
+            OnInit();
         }
 
         /// <summary>
@@ -61,6 +62,7 @@ namespace Game.Runtime.Hotfix
         }
 
         // 业务钩子由具体子类实现
+        protected abstract void OnInit();
         protected abstract void OnSpawn();
         protected abstract void OnDespawn();
     }
