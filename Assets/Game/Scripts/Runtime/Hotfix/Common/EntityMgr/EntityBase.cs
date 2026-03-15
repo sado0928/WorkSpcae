@@ -11,11 +11,11 @@ namespace Game.Runtime.Hotfix
         public int m_EntityId { get;private set; }
         // 实体类型
         public EntityType m_Type { get; private set; }
-        public BoxCollider2D m_Box2d { get; set; }
+        public BoxCollider2D m_Box2d { get;private set; }
         // 位置
         public Vector2 Position { get; set; }
         // 包围盒
-        public AABB Bounds { get; protected set; }
+        public AABB Bounds { get; private set; }
 
         public EntityHandle m_EntityHandle { get;private set; }
 
@@ -60,7 +60,7 @@ namespace Game.Runtime.Hotfix
         {
             if (gameObject.transform != null)
             {
-                Position = gameObject.transform.position;
+                gameObject.transform.position = Position;
                 // 同步 AABB 中心点
                 Bounds.Update(Position, Bounds.HalfSize);
             }

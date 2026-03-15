@@ -85,7 +85,10 @@ namespace Game.Runtime.Hotfix
 
         public void OnIUpdate(float dt)
         {
-            
+            foreach (EntityBase val in m_EntityList)
+            {
+                val.OnIUpdate(dt);
+            }
         }
     }
 }

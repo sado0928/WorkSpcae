@@ -10,6 +10,7 @@ namespace Game.Runtime.Hotfix
     public class BattleMgr : IUpdate
     {
         public Camera m_WorldCamera { get; private set; }
+        public Camera_Ctrl m_CameraCtrl { get; set; }
         private bool m_IsStarted = false;
         private Quadtree<EntityBase> m_Quadtree;
         private List<EntityBase> m_QueryResult = new List<EntityBase>();
@@ -32,7 +33,8 @@ namespace Game.Runtime.Hotfix
         public BattleMgr()
         {
             m_WorldCamera = Global.gApp.gWorldCamera;
-            
+            var cameraAABBAdapter = m_WorldCamera.GetComponent<Camera_Ctrl>();
+            if (cameraAABBAdapter == null) m_CameraCtrl = m_WorldCamera.gameObject.AddComponent<Camera_Ctrl>();
         }
         
         public void OnInit()
