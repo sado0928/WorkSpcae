@@ -45,12 +45,7 @@ namespace Game.Runtime.Hotfix
             m_Callback?.Invoke(this);
             m_Callback = null;
         }
-
-        public void Dispose()
-        {
-            Global.gApp.gEffectMgr.Dispose(this);
-        }
-
+        
         public void SetPosition(Vector3 pos)
         {
             if (IsLoaded) m_GameObject.transform.position = pos;

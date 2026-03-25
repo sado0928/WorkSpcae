@@ -14,7 +14,8 @@ namespace Game.Runtime.Hotfix
         private Vector3 m_InitScale;
         
         // 资源归属场景域
-        public ResTypeByScene ResTypeByScene;
+        public ResTypeByScene ResTypeByScene { get; private set; }
+
         // 资源地址
         public string Path { get; private set; }
 

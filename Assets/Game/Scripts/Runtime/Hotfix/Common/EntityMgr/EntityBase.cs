@@ -53,7 +53,7 @@ namespace Game.Runtime.Hotfix
 
         protected override void OnDespawn()
         {
-            m_EntityHandle.Dispose();
+            Global.gApp.gEntityMgr.OnDespawn(m_EntityHandle);
         }
         
         public void OnIUpdate(float dt)

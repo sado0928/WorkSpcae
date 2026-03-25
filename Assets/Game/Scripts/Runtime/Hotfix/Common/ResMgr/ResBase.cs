@@ -55,7 +55,7 @@ namespace Game.Runtime.Hotfix
             {
                 m_EffectDic.Remove(parentId);
                 m_EffectList.Remove(effectHandle);
-                effectHandle.Dispose();
+                Global.gApp.gEffectMgr.Dispose(effectHandle);
             }
             
             // 向上查找第一个 Canvas 
@@ -201,7 +201,10 @@ namespace Game.Runtime.Hotfix
             {
                 foreach (var handle in m_EffectList)
                 {
-                    if (handle != null) handle.Dispose();
+                    if (handle != null)
+                    {
+                        Global.gApp.gEffectMgr.Dispose(handle);
+                    }
                 }
                 m_EffectList.Clear();
             }

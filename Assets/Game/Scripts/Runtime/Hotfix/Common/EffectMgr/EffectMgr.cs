@@ -5,9 +5,9 @@ namespace Game.Runtime.Hotfix
 {
     public class EffectMgr:IUpdate
     {
-        public EffectConfig CurrentConfig { get; private set; }
         public Transform m_EffectRoot { get; private set; }
-
+        public EffectConfig CurrentConfig { get; private set; }
+        
         private List<EffectHandle> m_ActiveHandles = new List<EffectHandle>();
 
         public bool IsEffectLimit { get;private set; }
@@ -83,6 +83,7 @@ namespace Game.Runtime.Hotfix
             return handle;
         }
         
+        // 唯一接口
         public void Dispose(EffectHandle handle)
         {
             if (handle == null) return;
@@ -96,6 +97,14 @@ namespace Game.Runtime.Hotfix
             }
         }
         
+        public void OnDespawn(EffectHandle handle)
+        {
+            if (handle == null) return;
+            if (m_ActiveHandles.Contains(handle))
+            {
+                m_ActiveHandles.Remove(handle);
+            }
+        }
         public void OnDestroy()
         {
             var list = new List<EffectHandle>(m_ActiveHandles);

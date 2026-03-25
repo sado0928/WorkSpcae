@@ -10,7 +10,6 @@ namespace Game.Runtime.Hotfix
     public class EntityMgr : IUpdate
     {
         public Transform m_EntityRoot { get; private set; }
-
         public Dictionary<int, EntityBase> m_EntityDic { get; private set; } = new Dictionary<int, EntityBase>();
         public List<EntityBase> m_EntityList { get; private set; } = new List<EntityBase>();
         
@@ -70,6 +69,17 @@ namespace Game.Runtime.Hotfix
                 {
                     Global.gApp.gPoolMgr.Despawn(handle.m_GameObject);
                 }
+            }
+        }
+
+        public void OnDespawn(EntityHandle handle)
+        {
+            if (handle == null) return;
+            if (m_ActiveHandles.Contains(handle))
+            {
+                m_ActiveHandles.Remove(handle);
+                m_EntityList.Remove(handle.m_Base);
+                m_EntityDic.Remove(handle.m_Base.m_EntityId);
             }
         }
         

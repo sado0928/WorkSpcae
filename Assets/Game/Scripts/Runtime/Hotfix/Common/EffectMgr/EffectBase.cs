@@ -97,7 +97,7 @@ namespace Game.Runtime.Hotfix
 
         protected override void OnDespawn()
         {
-            m_EffectHandle.Dispose();
+            Global.gApp.gEffectMgr.OnDespawn(m_EffectHandle);
             StopLoopTimer();
             StopFinalDurationTimer();
             StopAllParticles();
@@ -141,7 +141,7 @@ namespace Game.Runtime.Hotfix
         {
             m_FinalDurationTimerId = Global.gApp.gTimerMgr.AddTimer(finalDuration, 1, (t, isEnd) =>
             {
-                m_EffectHandle.Dispose();
+                Global.gApp.gEffectMgr.Dispose(m_EffectHandle);
             });
         }
         
