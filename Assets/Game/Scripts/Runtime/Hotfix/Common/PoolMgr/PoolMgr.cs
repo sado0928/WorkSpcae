@@ -233,24 +233,24 @@ namespace Game.Runtime.Hotfix
             }
             foreach (var key in idleKeysToRemove) m_PoolIdleQueues.Remove(key);
 
-            // 清理活跃池
-            List<string> activeKeysToRemove = new List<string>();
-            foreach (var kv in m_PoolActiveLists)
-            {
-                var list = kv.Value;
-                if (list.Count > 0)
-                {
-                    var firstGo = list[0];
-                    var poolBase = firstGo != null ? firstGo.GetComponent<PoolBase>() : null;
-                    if (poolBase != null && poolBase.ResTypeByScene == scope)
-                    {
-                        foreach (var go in list) if (go) Global.gApp.gResMgr.Destroy(go);
-                        list.Clear();
-                        activeKeysToRemove.Add(kv.Key);
-                    }
-                }
-            }
-            foreach (var key in activeKeysToRemove) m_PoolActiveLists.Remove(key);
+            // 清理活跃池? 活跃池子不应该被管理 应该被所有应用到的模块管理
+            // List<string> activeKeysToRemove = new List<string>();
+            // foreach (var kv in m_PoolActiveLists)
+            // {
+            //     var list = kv.Value;
+            //     if (list.Count > 0)
+            //     {
+            //         var firstGo = list[0];
+            //         var poolBase = firstGo != null ? firstGo.GetComponent<PoolBase>() : null;
+            //         if (poolBase != null && poolBase.ResTypeByScene == scope)
+            //         {
+            //             foreach (var go in list) if (go) Global.gApp.gResMgr.Destroy(go);
+            //             list.Clear();
+            //             activeKeysToRemove.Add(kv.Key);
+            //         }
+            //     }
+            // }
+            // foreach (var key in activeKeysToRemove) m_PoolActiveLists.Remove(key);
 
             // 销毁物理根节点
             if (m_SceneRoots.TryGetValue(scope, out var root))
