@@ -12,6 +12,7 @@ namespace Game.Runtime.Hotfix
     public class Global : MonoBehaviour
     {
         public static App gApp { get;private set; }
+        public  static bool ApplicationQuiting { get;private set; }
         private void Awake()
         {
             gApp = new App();
@@ -79,7 +80,7 @@ namespace Game.Runtime.Hotfix
     
         private void OnDestroy()
         {
-            gApp.OnDestroy();
+            gApp?.OnDestroy();
         }
         
         // 后台预留
@@ -87,7 +88,12 @@ namespace Game.Runtime.Hotfix
         {
             
         }
-        
+
+        private void OnApplicationQuit()
+        {
+            ApplicationQuiting = true;
+        }
+
         /// <summary>
         /// 内存警告
         /// 当前帧的逻辑可能还在申请新内存（例如加载新资源、实例化对象），这可能成为压死骆驼的最后一根稻草。

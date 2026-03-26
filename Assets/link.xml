@@ -12,6 +12,7 @@
   <assembly fullname="UnityEngine.AudioModule" preserve="all" />
   <assembly fullname="UnityEngine.InputLegacyModule" preserve="all" />
   <assembly fullname="UnityEngine.ParticleSystemModule" preserve="all" />
+  <assembly fullname="UnityEngine.Physics2DModule" preserve="all" />
   <assembly fullname="UnityEngine.TextRenderingModule" preserve="all" />
   <assembly fullname="UnityEngine.UI" preserve="all" />
   <assembly fullname="UnityEngine.UIModule" preserve="all" />

@@ -41,6 +41,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 621033a2869c63748889d96623efde3f
+    m_Address: Metadata/UnityEngine.Physics2DModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c390b6463989df4f8d1dc28bf42086c
     m_Address: Metadata/UnityEngine.AnimationModule.dll.bytes
     m_ReadOnly: 0
