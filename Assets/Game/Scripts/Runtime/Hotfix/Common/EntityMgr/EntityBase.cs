@@ -12,13 +12,11 @@ namespace Game.Runtime.Hotfix
         // 实体类型
         public EntityType m_Type { get; private set; }
         public BoxCollider2D m_Box2d { get;private set; }
-        // 位置
-        public Vector2 Position { get; set; }
-        // 包围盒
-        public AABB Bounds { get; private set; }
-
         public EntityHandle m_EntityHandle { get;private set; }
-
+        
+        public Vector2 Position { get; set; }
+        public AABB Bounds { get; private set; }
+        
         protected override void OnInit()
         {
             // BoxCollider2D 读取编辑器配置

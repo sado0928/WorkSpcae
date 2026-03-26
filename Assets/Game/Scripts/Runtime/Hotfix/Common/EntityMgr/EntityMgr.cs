@@ -14,9 +14,9 @@ namespace Game.Runtime.Hotfix
         public List<EntityBase> m_EntityList { get; private set; } = new List<EntityBase>();
         
         private List<EntityHandle> m_ActiveHandles = new List<EntityHandle>();
+        
         private int m_IdCounter = 0;
-
-
+        
         public EntityMgr()
         {
             m_EntityRoot = new GameObject("EntityRoot").transform;
