@@ -3,17 +3,18 @@ using UnityEngine;
 namespace Game.Runtime.Hotfix
 {
     /// <summary>
-    /// 实体基类 (Common)
+    /// 实体基类 (Common) 
     /// </summary>
-    public abstract class EntityBase :PoolBase,IQuadtreeItem,IUpdate
+    public class EntityBase :PoolBase,IQuadtreeItem,IUpdate
     {
+        // 壳子（Transform相关的应该使用local API
+        public Transform m_Parent { get;private set; }
         // 实体id
-        public int m_EntityId { get;private set; }
+        public long m_EntityId { get;private set; }
         // 实体类型
-        public EntityType m_Type { get; private set; }
-        public BoxCollider2D m_Box2d { get;private set; }
+        public EntityType m_Type { get; private set; } 
         public EntityHandle m_EntityHandle { get;private set; }
-        
+        public BoxCollider2D m_Box2d { get;private set; }
         public Vector2 Position { get; set; }
         public AABB Bounds { get; private set; }
         
@@ -22,24 +23,8 @@ namespace Game.Runtime.Hotfix
             // BoxCollider2D 读取编辑器配置
             m_Box2d = gameObject.GetComponentInChildren<BoxCollider2D>();
             if (m_Box2d == null) m_Box2d = gameObject.AddComponent<BoxCollider2D>();
-
             // 强制禁用物理，仅作为数据容器
             m_Box2d.enabled = false;
-        }
-
-        public void SetEntityId(int id)
-        {
-            m_EntityId = id;
-        }
-
-        public void SetEntityType(EntityType type)
-        {
-            m_Type = type;
-        }
-
-        public void SetHandle(EntityHandle handle)
-        {
-            m_EntityHandle = handle;
         }
         
         protected override void OnSpawn()
@@ -52,6 +37,26 @@ namespace Game.Runtime.Hotfix
         protected override void OnDespawn()
         {
             Global.gApp.gEntityMgr.OnDespawn(m_EntityHandle);
+        }
+        
+        public void SetParent(Transform go)
+        {
+            m_Parent = go;
+        }
+
+        public void SetEntityId(long id)
+        {
+            m_EntityId = id;
+        }
+
+        public void SetEntityType(EntityType type)
+        {
+            m_Type = type;
+        }
+
+        public void SetHandle(EntityHandle handle)
+        {
+            m_EntityHandle = handle;
         }
         
         public void OnIUpdate(float dt)

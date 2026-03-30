@@ -10,12 +10,10 @@ namespace Game.Runtime.Hotfix
     public class EntityMgr : IUpdate
     {
         public Transform m_EntityRoot { get; private set; }
-        public Dictionary<int, EntityBase> m_EntityDic { get; private set; } = new Dictionary<int, EntityBase>();
+        public Dictionary<long, EntityBase> m_EntityDic { get; private set; } = new Dictionary<long, EntityBase>();
         public List<EntityBase> m_EntityList { get; private set; } = new List<EntityBase>();
         
         private List<EntityHandle> m_ActiveHandles = new List<EntityHandle>();
-        
-        private int m_IdCounter = 0;
         
         public EntityMgr()
         {
@@ -31,8 +29,13 @@ namespace Game.Runtime.Hotfix
         /// <param name="pos">位置</param>
         /// <param name="parent">挂点</param>
         /// <returns></returns>
-        public EntityHandle CreateEntity(string assetPath,EntityType type,vector2 pos,Transform parent = null)
+        public EntityHandle CreateEntity(string assetPath,EntityType type,Transform parent = null)
         {
+            // 套壳
+            GameObject go = new GameObject();
+            long sInstanceID = go.GetInstanceID();
+            go.name = System.IO.Path.GetFileName(assetPath) + "_" + sInstanceID;
+            
             EntityHandle handle = new EntityHandle(assetPath);
             m_ActiveHandles.Add(handle);
 
@@ -43,13 +46,17 @@ namespace Game.Runtime.Hotfix
                     Global.gApp.gPoolMgr.Despawn(entityBase.gameObject);
                     return;
                 }
-
-                int entityId = m_IdCounter++;
-                entityBase.transform.SetParent(parent ?? m_EntityRoot, false);
-                entityBase.SetEntityId(entityId);
+                
+                // 壳子节点
+                go.transform.SetParent(parent ?? m_EntityRoot, false);
+                // 实体节点
+                entityBase.transform.SetParent(go.transform);
+                
+                entityBase.SetParent(go.transform);
+                entityBase.SetEntityId(sInstanceID);
                 entityBase.SetEntityType(type);
                 entityBase.SetHandle(handle);
-                m_EntityDic.Add(entityId,entityBase);
+                m_EntityDic.Add(sInstanceID,entityBase);
                 m_EntityList.Add(entityBase);
                 handle.Complete(entityBase);
             });
@@ -62,9 +69,6 @@ namespace Game.Runtime.Hotfix
             if (handle == null) return;
             if (m_ActiveHandles.Contains(handle))
             {
-                m_ActiveHandles.Remove(handle);
-                m_EntityList.Remove(handle.m_Base);
-                m_EntityDic.Remove(handle.m_Base.m_EntityId);
                 if (handle.IsLoaded)
                 {
                     Global.gApp.gPoolMgr.Despawn(handle.m_GameObject);
@@ -80,6 +84,7 @@ namespace Game.Runtime.Hotfix
                 m_ActiveHandles.Remove(handle);
                 m_EntityList.Remove(handle.m_Base);
                 m_EntityDic.Remove(handle.m_Base.m_EntityId);
+                Global.gApp.gResMgr.Destroy(handle.m_Base.m_Parent?.gameObject);
             }
         }
         

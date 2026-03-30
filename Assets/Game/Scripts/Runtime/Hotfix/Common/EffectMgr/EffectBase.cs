@@ -15,7 +15,18 @@ namespace Game.Runtime.Hotfix
         {
             CalculateMaxDuration();
         }
+        protected override void OnSpawn()
+        {
+            ApplyConfig(Global.gApp.gEffectMgr.CurrentConfig);
+        }
 
+        protected override void OnDespawn()
+        {
+            Global.gApp.gEffectMgr.OnDespawn(m_EffectHandle);
+            StopLoopTimer();
+            StopFinalDurationTimer();
+            StopAllParticles();
+        }
         /// <summary>
         /// 综合计算粒子与动画的最大时长
         /// </summary>
@@ -88,21 +99,7 @@ namespace Game.Runtime.Hotfix
         }
 
         #endregion
-       
-
-        protected override void OnSpawn()
-        {
-            ApplyConfig(Global.gApp.gEffectMgr.CurrentConfig);
-        }
-
-        protected override void OnDespawn()
-        {
-            Global.gApp.gEffectMgr.OnDespawn(m_EffectHandle);
-            StopLoopTimer();
-            StopFinalDurationTimer();
-            StopAllParticles();
-        }
-
+        
         /// <summary>
         /// 应用画质配置
         /// </summary>

@@ -22,11 +22,15 @@ namespace Game.Runtime.Hotfix
             }
             private set { }
         }
-
         public bool IsLoaded => m_Base != null;
 
         private Action<EntityHandle> m_Callback;
 
+        public Vector3 Position { get;private set; }
+        public Quaternion Rotation { get;private set; }
+        public Vector3 Scale { get;private set; }
+        public Transform Parent { get;private set; }
+        
         public EntityHandle(string path)
         {
             Path = path;
@@ -48,23 +52,35 @@ namespace Game.Runtime.Hotfix
         public void Complete(EntityBase baseComp)
         {
             m_Base = baseComp;
+            if (Position !=default) SetPosition(Position);
+            if (Rotation !=default) SetRotation(Rotation);
+            if (Scale !=default) SetScale(Scale);
+            if (Parent !=default) SetParent(Parent);
             m_Callback?.Invoke(this);
             m_Callback = null;
         }
         
         public void SetPosition(Vector3 pos)
         {
-            if (IsLoaded) m_GameObject.transform.position = pos;
+            Position = pos;
+            if (IsLoaded) m_GameObject.transform.localPosition = pos; 
         }
 
         public void SetRotation(Quaternion rot)
         {
-            if (IsLoaded) m_GameObject.transform.rotation = rot;
+            Rotation = rot;
+            if (IsLoaded) m_GameObject.transform.localRotation = rot;
         }
         
-        public void SetParent(Transform parent, bool worldPositionStays = false)
+        public void SetScale(Vector3 scale)
         {
-            if (IsLoaded) m_GameObject.transform.SetParent(parent, worldPositionStays);
+            Scale = scale;
+            if (IsLoaded) m_GameObject.transform.localScale = scale;
+        }
+        public void SetParent(Transform parent)
+        {
+            Parent = parent;
+            if (IsLoaded) m_Base.m_Parent.SetParent(parent, false);
         }
     }
     
