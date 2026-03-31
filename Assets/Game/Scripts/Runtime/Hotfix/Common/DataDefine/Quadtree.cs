@@ -18,7 +18,7 @@ namespace Game.Runtime.Hotfix
         {
             m_Level = level;
             m_Boundary = boundary;
-            m_Items = new List<T>(MAX_ITEMS + 1); // 预分配容量
+            m_Items = new List<T>(MAX_ITEMS); // 预分配容量
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace Game.Runtime.Hotfix
             // 检查当前节点的物体
             for (int i = 0; i < m_Items.Count; i++)
             {
-                if (range.Contains(m_Items[i].Position))
+                if (range.Overlaps(m_Items[i].Bounds))
                 {
                     results.Add(m_Items[i]);
                 }
