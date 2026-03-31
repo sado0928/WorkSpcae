@@ -25,8 +25,8 @@ namespace Game.Runtime.Hotfix
     public interface IQuadtreeItem
     {
         // 坐标
-        Vector2 Position { get; }
+        Vector2 m_Position { get; }
         // 包围盒
-        AABB Bounds { get; }
+        AABB m_Bounds { get; }
     }
 }

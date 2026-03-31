@@ -9,11 +9,10 @@ namespace Game.Runtime.Hotfix
     /// </summary>
     public class EntityMgr : IUpdate
     {
+        private List<EffectHandle<EffectBase>> m_ActiveHandles = new List<EffectHandle<EffectBase>>();
         public Transform m_EntityRoot { get; private set; }
         public Dictionary<long, EntityBase> m_EntityDic { get; private set; } = new Dictionary<long, EntityBase>();
         public List<EntityBase> m_EntityList { get; private set; } = new List<EntityBase>();
-        
-        private List<EntityHandle> m_ActiveHandles = new List<EntityHandle>();
         
         public EntityMgr()
         {
@@ -26,27 +25,18 @@ namespace Game.Runtime.Hotfix
         /// </summary>
         /// <param name="assetPath">地址</param>
         /// <param name="type">类型</param>
-        /// <param name="pos">位置</param>
         /// <param name="parent">挂点</param>
         /// <returns></returns>
-        public EntityHandle CreateEntity(string assetPath,EntityType type,Transform parent = null)
+        public EntityHandle<T> CreateEntity<T>(string assetPath,EntityType type,Transform parent = null) where T : EntityBase
         {
             // 套壳
             GameObject go = new GameObject();
             long sInstanceID = go.GetInstanceID();
             go.name = System.IO.Path.GetFileName(assetPath) + "_" + sInstanceID;
             
-            EntityHandle handle = new EntityHandle(assetPath);
-            m_ActiveHandles.Add(handle);
-
-            Global.gApp.gPoolMgr.Spawn<EntityBase>(assetPath).SetCallback((entityBase) =>
+            EntityHandle<T> handle = new EntityHandle<T>();
+            Global.gApp.gPoolMgr.Spawn<T>(assetPath).SetCallback((entityBase) =>
             {
-                if (!m_ActiveHandles.Contains(handle))
-                {
-                    Global.gApp.gPoolMgr.Despawn(entityBase.gameObject);
-                    return;
-                }
-                
                 // 壳子节点
                 go.transform.SetParent(parent ?? m_EntityRoot, false);
                 // 实体节点
@@ -55,7 +45,6 @@ namespace Game.Runtime.Hotfix
                 entityBase.SetParent(go.transform);
                 entityBase.SetEntityId(sInstanceID);
                 entityBase.SetEntityType(type);
-                entityBase.SetHandle(handle);
                 m_EntityDic.Add(sInstanceID,entityBase);
                 m_EntityList.Add(entityBase);
                 handle.Complete(entityBase);
@@ -64,35 +53,30 @@ namespace Game.Runtime.Hotfix
             return handle;
         }
         
-        public void Dispose(EntityHandle handle)
+        public void Dispose(EntityBase entity)
         {
-            if (handle == null) return;
-            if (m_ActiveHandles.Contains(handle))
+            if (entity == null) return;
+            if (m_EntityList.Contains(entity))
             {
-                if (handle.IsLoaded)
-                {
-                    Global.gApp.gPoolMgr.Despawn(handle.m_GameObject);
-                }
+                Global.gApp.gPoolMgr.Despawn(entity.gameObject);
             }
         }
 
-        public void OnDespawn(EntityHandle handle)
+        public void OnDespawn(EntityBase entity)
         {
-            if (handle == null) return;
-            if (m_ActiveHandles.Contains(handle))
+            if (entity == null) return;
+            if (m_EntityList.Contains(entity))
             {
-                m_ActiveHandles.Remove(handle);
-                m_EntityList.Remove(handle.m_Base);
-                m_EntityDic.Remove(handle.m_Base.m_EntityId);
-                Global.gApp.gResMgr.Destroy(handle.m_Base.m_Parent?.gameObject);
+                m_EntityList.Remove(entity);
+                m_EntityDic.Remove(entity.m_EntityId);
+                Global.gApp.gResMgr.Destroy(entity.m_Parent?.gameObject);
             }
         }
         
         public void OnDestroy()
         {
-            var list = new List<EntityHandle>(m_ActiveHandles);
+            var list = new List<EntityBase>(m_EntityList);
             foreach (var h in list) Dispose(h);
-            m_ActiveHandles.Clear();
             m_EntityList.Clear();
             m_EntityDic.Clear();
             if (m_EntityRoot != null) Global.gApp.gResMgr.Destroy(m_EntityRoot.gameObject);

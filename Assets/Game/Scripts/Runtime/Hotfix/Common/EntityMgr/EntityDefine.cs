@@ -10,77 +10,70 @@ namespace Game.Runtime.Hotfix
         Monster = 2,
     }
     
-    public class EntityHandle
+    /// <summary>
+    /// 实体 异步加载句柄
+    /// </summary>
+    /// <typeparam name="T">EntityBase 的具体类型</typeparam>
+    public class EntityHandle<T> where T : EntityBase
     {
-        public string Path { get; private set; }
-        public EntityBase m_Base { get; private set; }
-        public GameObject m_GameObject
-        {
-            get
-            {
-                return  m_Base != null ? m_Base.gameObject : null;;
-            }
-            private set { }
-        }
-        public bool IsLoaded => m_Base != null;
-
-        private Action<EntityHandle> m_Callback;
-
-        public Vector3 Position { get;private set; }
-        public Quaternion Rotation { get;private set; }
-        public Vector3 Scale { get;private set; }
-        public Transform Parent { get;private set; }
+        private Action<T> m_OnComplete;
+        private T m_Result;
+        private bool m_IsDone;
         
-        public EntityHandle(string path)
+        public Vector3 Position { get;private set; }
+        public Vector3 Rotation { get;private set; }
+
+        public Vector3 Scale { get;private set; }
+        
+        public EntityHandle()
         {
-            Path = path;
+            m_IsDone = false;
         }
 
-        public EntityHandle SetCallback(Action<EntityHandle> callback)
+        /// <summary>
+        /// 设置加载完成后的回调
+        /// 如果已经加载完成，会立即执行回调
+        /// </summary>
+        public void SetCallback(Action<T> callback)
         {
-            if (IsLoaded)
+            m_OnComplete = callback;
+            if (m_IsDone && m_Result != null)
             {
-                callback?.Invoke(this);
+                m_OnComplete?.Invoke(m_Result);
+                m_OnComplete = null; // 触发一次后清空，避免重复
             }
-            else
-            {
-                m_Callback = callback;
-            }
-            return this;
         }
 
-        public void Complete(EntityBase baseComp)
+        /// <summary>
+        /// 内部调用：标记加载完成
+        /// </summary>
+        public void Complete(T result)
         {
-            m_Base = baseComp;
+            m_Result = result;
+            m_IsDone = true;
             if (Position !=default) SetPosition(Position);
             if (Rotation !=default) SetRotation(Rotation);
             if (Scale !=default) SetScale(Scale);
-            if (Parent !=default) SetParent(Parent);
-            m_Callback?.Invoke(this);
-            m_Callback = null;
+            m_OnComplete?.Invoke(m_Result);
+            m_OnComplete = null;
         }
         
         public void SetPosition(Vector3 pos)
         {
             Position = pos;
-            if (IsLoaded) m_GameObject.transform.localPosition = pos; 
+            if (m_IsDone) m_Result.OnSetPosition(pos); 
         }
 
-        public void SetRotation(Quaternion rot)
+        public void SetRotation(Vector3 rot)
         {
             Rotation = rot;
-            if (IsLoaded) m_GameObject.transform.localRotation = rot;
+            if (m_IsDone) m_Result.OnSetRotation(rot);
         }
         
         public void SetScale(Vector3 scale)
         {
             Scale = scale;
-            if (IsLoaded) m_GameObject.transform.localScale = scale;
-        }
-        public void SetParent(Transform parent)
-        {
-            Parent = parent;
-            if (IsLoaded) m_Base.m_Parent.SetParent(parent, false);
+            if (m_IsDone) m_Result.OnSetScale(scale);
         }
     }
     

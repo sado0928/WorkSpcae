@@ -59,23 +59,27 @@ namespace Game.Runtime.Hotfix
         {
             if (gTimerMgr != null) gTimerMgr.OnIUpdate(dt);
             if (gFrameTimerMgr != null) gFrameTimerMgr.OnIUpdate(dt);
-            if (gAudioMgr != null) gAudioMgr.OnIUpdate(dt);
             if (gUIMgr != null) gUIMgr.OnIUpdate(dt);
+            if (gProcedureMgr != null) gProcedureMgr.OnIUpdate(dt);
+            if (gAudioMgr != null) gAudioMgr.OnIUpdate(dt);
             if (gEffectMgr != null) gEffectMgr.OnIUpdate(dt);
             if (gBattleMgr != null) gBattleMgr.OnIUpdate(dt);
             if (gEntityMgr != null) gEntityMgr.OnIUpdate(dt);
-            if (gProcedureMgr != null) gProcedureMgr.OnIUpdate(dt);
+         
         }
 
         public void OnDestroy()
         {
-            if (gAudioMgr != null) gAudioMgr.OnDestroy();
-            if (gProcedureMgr != null) gProcedureMgr.OnDestroy();
-            if (gResMgr != null) gResMgr.OnDestroy();
+           
             if (gPoolMgr != null) gPoolMgr.OnDestroy();
             if (gEffectMgr != null) gEffectMgr.OnDestroy();
             if (gBattleMgr != null) gBattleMgr.OnDestroy();
             if (gEntityMgr != null) gEntityMgr.OnDestroy();
+            
+            if (gProcedureMgr != null) gProcedureMgr.OnDestroy();
+            if (gAudioMgr != null) gAudioMgr.OnDestroy();
+            if (gResMgr != null) gResMgr.OnDestroy();
+        
         }
     }
 }

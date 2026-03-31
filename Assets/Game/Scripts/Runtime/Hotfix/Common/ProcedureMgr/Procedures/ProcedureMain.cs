@@ -20,7 +20,7 @@ namespace Game.Runtime.Hotfix
 
         public override void OnLeave()
         {
-            Global.gApp.gUIMgr.CloseUI(UIDefine.MainUI);
+            Global.gApp.gUIMgr.CloseAll();
             Global.gApp.gAudioMgr.StopBGM();
         }
 

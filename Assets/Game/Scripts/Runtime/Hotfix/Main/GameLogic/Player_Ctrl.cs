@@ -26,17 +26,18 @@ public class Player_Ctrl : MonoBehaviour,IUpdate
     public SpriteRenderer m_SpriteRender; // Render
     public EntityHero m_Player { get;private set; } // 角色
 
-    public AABB m_PlayerAABB { get; set; }
+    public AABB m_PlayerAABB;
     
     #region 初始化
     private void Awake()
     {
-        m_PlayerAABB = m_Player.Bounds;
-        
+        m_Player = GetComponent<EntityHero>();
+        m_PlayerAABB = m_Player.m_Bounds;
+        m_SpriteRender = GetComponent<SpriteRenderer>();
         // 自动获取摄像机AABB组件（如果未手动赋值）
         if (limitInViewport && m_CameraCtrl == null)
         {
-            m_CameraCtrl = Camera.main.GetComponent<Camera_Ctrl>();
+            m_CameraCtrl = Global.gApp.gBattleMgr.m_WorldCamera.GetComponent<Camera_Ctrl>();
         }
     }
     #endregion
@@ -62,7 +63,7 @@ public class Player_Ctrl : MonoBehaviour,IUpdate
     {
         if (m_MoveInput.sqrMagnitude > 0.01f)
         {
-            m_Player.Position += m_MoveInput * m_Player.Speed * dt;
+            m_Player.m_Position += m_MoveInput * m_Player.Speed * dt;
         }
     }
     #endregion
@@ -105,7 +106,7 @@ public class Player_Ctrl : MonoBehaviour,IUpdate
     private void LookAtMouse()
     {
         // 1. 获取鼠标世界坐标（将屏幕坐标转为世界坐标）
-        Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mouseWorldPos = Global.gApp.gBattleMgr.m_WorldCamera.ScreenToWorldPoint(Input.mousePosition);
 
         // 2. 计算角色到鼠标的方向
         Vector2 direction = mouseWorldPos - (Vector2)transform.position;
@@ -173,7 +174,7 @@ public class Player_Ctrl : MonoBehaviour,IUpdate
     private void LimitInViewport()
     {
         AABB viewportAABB = m_CameraCtrl.m_ViewportAABB;
-        Vector2 currentPos = transform.position;
+        Vector2 currentPos = m_Player.m_Position;
 
         // 计算视口内的有效范围（加偏移，避免角色贴边）
         float minX = viewportAABB.Center.x - viewportAABB.HalfSize.x + viewportOffset + m_PlayerAABB.HalfSize.x;
@@ -184,7 +185,7 @@ public class Player_Ctrl : MonoBehaviour,IUpdate
         // 限制角色位置在有效范围内
         currentPos.x = Mathf.Clamp(currentPos.x, minX, maxX);
         currentPos.y = Mathf.Clamp(currentPos.y, minY, maxY);
-        
+        m_Player.m_Position = currentPos;
     }
     #endregion
 

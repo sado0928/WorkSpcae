@@ -9,7 +9,7 @@ using Game.Runtime.Hotfix;
 public class Camera_Ctrl : MonoBehaviour
 {
     private Camera m_WorldCamera;
-    public AABB m_ViewportAABB { get; private set; }// 摄像机视口的 AABB 包围盒
+    public AABB m_ViewportAABB;
     private float m_lastOrthographicSize; // 记录上一帧的缩放值，用于检测变化
     private Vector2 m_LastCameraPos; // 记录上一帧的摄像机位置
 

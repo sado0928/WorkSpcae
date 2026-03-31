@@ -551,7 +551,7 @@ namespace Game.Runtime.Hotfix
         /// 关闭所有 UI
         /// </summary>
         /// <param name="keepLayer">可选：指定一个需要保留的层级 (例如 Main 层)。如果传null，则关闭所有。</param>
-        public void CloseAll(UILayer? keepLayer = UILayer.Main)
+        public void CloseAll(UILayer? keepLayer = null)
         {
             // 复制 Keys 列表防止修改集合报错
             var keys = new List<string>(m_OpenUIDic.Keys);

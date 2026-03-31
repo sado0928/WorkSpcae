@@ -58,7 +58,7 @@ namespace Game.Runtime.Hotfix
 
         public bool Insert(T item)
         {
-            if (!m_Boundary.Contains(item.Position)) return false;
+            if (!m_Boundary.Contains(item.m_Position)) return false;
 
             // 如果还没分裂且没满，或者达到最大深度
             if (!m_IsSplit && (m_Items.Count < MAX_ITEMS || m_Level >= MAX_LEVELS))
@@ -98,7 +98,7 @@ namespace Game.Runtime.Hotfix
             // 检查当前节点的物体
             for (int i = 0; i < m_Items.Count; i++)
             {
-                if (range.Overlaps(m_Items[i].Bounds))
+                if (range.Overlaps(m_Items[i].m_Bounds))
                 {
                     results.Add(m_Items[i]);
                 }

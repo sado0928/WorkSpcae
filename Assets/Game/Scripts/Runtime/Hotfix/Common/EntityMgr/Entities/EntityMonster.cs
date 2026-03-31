@@ -3,11 +3,11 @@
     public class EntityMonster:EntityBase
     {
         public monster m_Cfg { get;private set; }
-        public int Hp { get; set; }
-        public int Atk { get; set; }
-        public float Speed { get; set; }
+        public float Hp;
+        public float Atk;
+        public float Speed;
         
-        public EntityMonster(monster data)
+        public void SetData(monster data)
         {
             m_Cfg = data;
             Hp = m_Cfg.Hp;

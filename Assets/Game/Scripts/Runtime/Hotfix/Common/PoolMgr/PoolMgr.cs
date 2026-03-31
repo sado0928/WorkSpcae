@@ -97,13 +97,20 @@ namespace Game.Runtime.Hotfix
             
             Global.gApp.gResMgr.LoadPrefabAsync(key, (prefab) =>
             {
-                m_LoadingPools.Remove(key);
+                // 没有预设直接报错
                 if (prefab == null)
                 {
                     callback?.Invoke(null);
                     return;
                 }
 
+                // 这里被清空了，说明资源加载完成但实例化之前已经取消了加载
+                if (!m_LoadingPools.Contains(key))
+                {
+                    Global.gApp.gResMgr.Destroy(prefab);
+                    return;
+                }
+                m_LoadingPools.Remove(key);
                 // 实例化
                 CreateInstance(key, componentType, prefab, callback);
 
@@ -286,6 +293,9 @@ namespace Game.Runtime.Hotfix
 
             foreach (var root in m_SceneRoots.Values) if (root != null) Global.gApp.gResMgr.Destroy(root.gameObject);
             m_SceneRoots.Clear();
+            
+            m_LoadingPools.Clear();
+            m_WaitingTasks.Clear();
         }
     }
 }

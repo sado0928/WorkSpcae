@@ -5,7 +5,6 @@ namespace Game.Runtime.Hotfix
 {
     public class EffectBase : PoolBase
     {
-        public EffectHandle m_EffectHandle { get;private set; }
         private ParticleSystem[] m_Particles;
         public float m_MaxDuration { get; private set; } 
         private int m_LoopTimerId = -1;
@@ -19,17 +18,15 @@ namespace Game.Runtime.Hotfix
         {
             ApplyConfig(Global.gApp.gEffectMgr.CurrentConfig);
         }
-
         protected override void OnDespawn()
         {
-            Global.gApp.gEffectMgr.OnDespawn(m_EffectHandle);
+            Global.gApp.gEffectMgr.OnDespawn(this);
             StopLoopTimer();
             StopFinalDurationTimer();
             StopAllParticles();
         }
-        /// <summary>
-        /// 综合计算粒子与动画的最大时长
-        /// </summary>
+  
+        // 综合计算粒子与动画的最大时长
         private void CalculateMaxDuration()
         {
             m_MaxDuration = 0f;
@@ -69,6 +66,31 @@ namespace Game.Runtime.Hotfix
             if (m_MaxDuration <= 0) m_MaxDuration = 0.1f;
         }
 
+        private void StopAllParticles()
+        {
+            if (m_Particles == null) return;
+            foreach (var ps in m_Particles)
+            {
+                ps.Clear();
+                ps.Stop();
+            }
+        }
+        private void StopLoopTimer()
+        {
+            if (m_LoopTimerId != -1)
+            {
+                Global.gApp.gTimerMgr.RemoveTimer(m_LoopTimerId);
+                m_LoopTimerId = -1;
+            }
+        }
+        private void StopFinalDurationTimer()
+        {
+            if (m_FinalDurationTimerId != -1)
+            {
+                Global.gApp.gTimerMgr.RemoveTimer(m_FinalDurationTimerId);
+                m_FinalDurationTimerId = -1;
+            }
+        }
         #region  设置渲染相关
 
         public void SetGameObjectLayer(int layer)
@@ -100,9 +122,6 @@ namespace Game.Runtime.Hotfix
 
         #endregion
         
-        /// <summary>
-        /// 应用画质配置
-        /// </summary>
         public void ApplyConfig(EffectConfig config)
         {
             if (config == null) return;
@@ -117,12 +136,7 @@ namespace Game.Runtime.Hotfix
                 main.maxParticles = Mathf.Min(main.maxParticles, config.MaxParticlesLimit);
             }
         }
-
-        public void SetHandle(EffectHandle handle)
-        {
-            m_EffectHandle = handle;
-        }
-
+        
         public void SetLoop(bool isLoop)
         {
             StopLoopTimer();
@@ -138,7 +152,7 @@ namespace Game.Runtime.Hotfix
         {
             m_FinalDurationTimerId = Global.gApp.gTimerMgr.AddTimer(finalDuration, 1, (t, isEnd) =>
             {
-                Global.gApp.gEffectMgr.Dispose(m_EffectHandle);
+                Global.gApp.gEffectMgr.Dispose(this);
             });
         }
         
@@ -158,31 +172,19 @@ namespace Game.Runtime.Hotfix
             foreach (var anim in animations) anim.Play();
         }
         
-        private void StopAllParticles()
+        public void OnSetPosition(Vector3 pos)
         {
-            if (m_Particles == null) return;
-            foreach (var ps in m_Particles)
-            {
-                ps.Clear();
-                ps.Stop();
-            }
+            transform.localPosition = pos;
         }
 
-        private void StopLoopTimer()
+        public void OnSetRotation(Vector3 eulerAngle)
         {
-            if (m_LoopTimerId != -1)
-            {
-                Global.gApp.gTimerMgr.RemoveTimer(m_LoopTimerId);
-                m_LoopTimerId = -1;
-            }
+            transform.localRotation = Quaternion.Euler(eulerAngle);
         }
-        private void StopFinalDurationTimer()
+
+        public void OnSetScale(Vector3 scale)
         {
-            if (m_FinalDurationTimerId != -1)
-            {
-                Global.gApp.gTimerMgr.RemoveTimer(m_FinalDurationTimerId);
-                m_FinalDurationTimerId = -1;
-            }
+            transform.localScale = scale;
         }
         
     }

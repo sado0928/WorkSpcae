@@ -3,11 +3,11 @@
     public class EntityHero:EntityBase
     {
         public hero m_Cfg { get;private set; }
-        public int Hp { get; set; }
-        public int Atk { get; set; }
-        public float Speed { get; set; }
+        public float Hp;
+        public float Atk;
+        public float Speed;
         
-        public EntityHero(hero data)
+        public void SetData(hero data)
         {
             m_Cfg = data;
             Hp = m_Cfg.Hp;

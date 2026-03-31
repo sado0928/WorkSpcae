@@ -20,8 +20,8 @@ namespace Game.Runtime.Hotfix
         private Dictionary<string, ResType> m_LoadedAssets = new Dictionary<string, ResType>();
         
         // 托管特效列表：UI 销毁时自动回收关联特效 key => instanceID
-        private Dictionary<int,EffectHandle> m_EffectDic = new Dictionary<int,EffectHandle>();
-        private List<EffectHandle> m_EffectList = new List<EffectHandle>();
+        private Dictionary<int,EffectBase> m_EffectDic = new Dictionary<int,EffectBase>();
+        private List<EffectBase> m_EffectList = new List<EffectBase>();
         
         // 动态特效的order管理 key => instanceID
         private Dictionary<int, int> m_EffectOrderDic = new Dictionary<int, int>();
@@ -35,27 +35,27 @@ namespace Game.Runtime.Hotfix
         /// <param name="path">特效资源路径</param>
         /// <param name="parent">挂点，默认为当前 UI</param>
         /// <returns></returns>
-        public EffectHandle PlayEffect(string path, Transform parent,bool isLoop = false,float duration = -1f )
+        public void PlayEffect(string path, Transform parent,bool isLoop = false,float duration = -1f )
         {
             if (string.IsNullOrEmpty(path))
             {
                 Global.LogError("error by ResBase function for PlayEffect , path is empty");
-                return null;
+                return ;
             }
             if (parent == null)
             {
                 Global.LogError("error by ResBase function for PlayEffect , parent is empty");
-                return null;
+                return ;
             }
             
             // 如果是同一个父节点需要清理一下老特效
             int parentId = parent.GetInstanceID();
             int parentLayer = parent.gameObject.layer;
-            if (m_EffectDic.TryGetValue(parentId,out EffectHandle effectHandle))
+            if (m_EffectDic.TryGetValue(parentId,out EffectBase effectBase))
             {
                 m_EffectDic.Remove(parentId);
-                m_EffectList.Remove(effectHandle);
-                Global.gApp.gEffectMgr.Dispose(effectHandle);
+                m_EffectList.Remove(effectBase);
+                Global.gApp.gEffectMgr.Dispose(effectBase);
             }
             
             // 向上查找第一个 Canvas 
@@ -63,7 +63,7 @@ namespace Game.Runtime.Hotfix
             if (canvas == null)
             {
                 Global.LogError("error by ResBase function for PlayEffect , parent canvas is not found");
-                return null;
+                return ;
             }
 
             int sortingOrder = 0;
@@ -80,19 +80,16 @@ namespace Game.Runtime.Hotfix
                 m_EffectOrderDic[canvasId] = nextOrder;
             }
             
-            EffectHandle handle = Global.gApp.gEffectMgr.PlayEffect(path, parent,isLoop,duration);
-            handle.SetCallback((effectHandle) =>
+            Global.gApp.gEffectMgr.PlayEffect<EffectBase>(path, parent,isLoop,duration).SetCallback((effectBase) =>
             {
-                if (effectHandle != null && canvas != null)
+                if (effectBase != null && canvas != null)
                 {
-                    effectHandle.m_Base.SetGameObjectLayer(parentLayer);
-                    effectHandle.m_Base.SetSortingOrder(sortingOrder);
+                    effectBase.SetGameObjectLayer(parentLayer);
+                    effectBase.SetSortingOrder(sortingOrder);
                 }
+                m_EffectDic.Add(parentId,effectBase);
+                m_EffectList.Add(effectBase);
             });
-
-            m_EffectDic.Add(parentId,handle);
-            m_EffectList.Add(handle);
-            return handle;
         }
 
         /// <summary>

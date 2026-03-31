@@ -8,7 +8,7 @@ namespace Game.Runtime.Hotfix
         public Transform m_EffectRoot { get; private set; }
         public EffectConfig CurrentConfig { get; private set; }
         
-        private List<EffectHandle> m_ActiveHandles = new List<EffectHandle>();
+        private List<EffectBase> m_Effects = new List<EffectBase>();
 
         public bool IsEffectLimit { get;private set; }
         
@@ -29,9 +29,9 @@ namespace Game.Runtime.Hotfix
             CurrentConfig = EffectDefine.GetUIConfig(key);
             if (CurrentConfig == null) return;
 
-            foreach (var handle in m_ActiveHandles)
+            foreach (var effectBase in m_Effects)
             {
-                if (handle.IsLoaded) handle.m_Base.ApplyConfig(CurrentConfig);
+                effectBase.ApplyConfig(CurrentConfig);
             }
             
             Debug.Log($"[EffectMgr] Quality Switched to: {key}");
@@ -53,24 +53,17 @@ namespace Game.Runtime.Hotfix
         /// <param name="isLoop">是否循环,循环的情况下持续时间不生效</param>
         /// <param name="duration">持续时间</param>
         /// <returns></returns>
-        public EffectHandle PlayEffect(string assetPath, Transform parent = null, bool isLoop = false,float duration = -1f)
+        public EffectHandle<T> PlayEffect<T>(string assetPath, Transform parent = null, bool isLoop = false,float duration = -1f) where T : EffectBase
         {
-            EffectHandle handle = new EffectHandle(assetPath);
-            m_ActiveHandles.Add(handle);
+            EffectHandle<T> handle = new EffectHandle<T>();
 
-            Global.gApp.gPoolMgr.Spawn<EffectBase>(assetPath).SetCallback((effectBase) =>
+            Global.gApp.gPoolMgr.Spawn<T>(assetPath).SetCallback((effectBase) =>
             {
-                if (!m_ActiveHandles.Contains(handle))
-                {
-                    Global.gApp.gPoolMgr.Despawn(effectBase.gameObject);
-                    return;
-                }
- 
                 effectBase.transform.SetParent(parent ?? m_EffectRoot, false);
-                effectBase.SetHandle(handle);
                 if (isLoop) effectBase.SetLoop(true);
                 
                 handle.Complete(effectBase);
+                m_Effects.Add(effectBase);
 
                 // 优先使用传入的 duration，如果没有则使用 EffectBase 自动计算的时长
                 if (!isLoop)
@@ -83,44 +76,60 @@ namespace Game.Runtime.Hotfix
             return handle;
         }
         
+        public void PlayEffect(string assetPath, Transform parent = null, bool isLoop = false,float duration = -1f)
+        {
+            EffectHandle<EffectBase> handle = new EffectHandle<EffectBase>();
+
+            Global.gApp.gPoolMgr.Spawn<EffectBase>(assetPath).SetCallback((effectBase) =>
+            {
+                effectBase.transform.SetParent(parent ?? m_EffectRoot, false);
+                if (isLoop) effectBase.SetLoop(true);
+                
+                handle.Complete(effectBase);
+                m_Effects.Add(effectBase);
+
+                // 优先使用传入的 duration，如果没有则使用 EffectBase 自动计算的时长
+                if (!isLoop)
+                {
+                    float finalDuration = duration > 0 ? duration : effectBase.m_MaxDuration;
+                    effectBase.SetFinalDuration(finalDuration);
+                }
+            });
+        }
         // 唯一接口
-        public void Dispose(EffectHandle handle)
+        public void Dispose(EffectBase handle)
         {
             if (handle == null) return;
-            if (m_ActiveHandles.Contains(handle))
+            if (m_Effects.Contains(handle))
             {
-                m_ActiveHandles.Remove(handle);
-                if (handle.IsLoaded)
-                {
-                    Global.gApp.gPoolMgr.Despawn(handle.m_GameObject);
-                }
+                Global.gApp.gPoolMgr.Despawn(handle.gameObject);
             }
         }
         
-        public void OnDespawn(EffectHandle handle)
+        public void OnDespawn(EffectBase handle)
         {
             if (handle == null) return;
-            if (m_ActiveHandles.Contains(handle))
+            if (m_Effects.Contains(handle))
             {
-                m_ActiveHandles.Remove(handle);
+                m_Effects.Remove(handle);
             }
         }
         public void OnDestroy()
         {
-            var list = new List<EffectHandle>(m_ActiveHandles);
+            var list = new List<EffectBase>(m_Effects);
             foreach (var h in list) Dispose(h);
-            m_ActiveHandles.Clear();
+            m_Effects.Clear();
             if (m_EffectRoot != null) Global.gApp.gResMgr.Destroy(m_EffectRoot.gameObject);
         }
 
         public void OnIUpdate(float dt)
         {
-            if (IsEffectLimit && m_ActiveHandles.Count > CurrentConfig.EffectLimit)
+            if (IsEffectLimit && m_Effects.Count > CurrentConfig.EffectLimit)
             {
                 // 从后往前清理超出限制的特效
-                for (int i = m_ActiveHandles.Count - 1; i >= CurrentConfig.EffectLimit; i--)
+                for (int i = m_Effects.Count - 1; i >= CurrentConfig.EffectLimit; i--)
                 {
-                    Dispose(m_ActiveHandles[i]);
+                    Dispose(m_Effects[i]);
                 }
             }
         }

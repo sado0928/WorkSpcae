@@ -13,10 +13,9 @@ namespace Game.Runtime.Hotfix
         public long m_EntityId { get;private set; }
         // 实体类型
         public EntityType m_Type { get; private set; } 
-        public EntityHandle m_EntityHandle { get;private set; }
         public BoxCollider2D m_Box2d { get;private set; }
-        public Vector2 Position { get; set; }
-        public AABB Bounds { get; private set; }
+        public Vector2 m_Position { get; set; }
+        public AABB m_Bounds { get; private set; }
         
         protected override void OnInit()
         {
@@ -29,14 +28,14 @@ namespace Game.Runtime.Hotfix
         
         protected override void OnSpawn()
         {
-            Position = gameObject.transform.position;
+            m_Position = gameObject.transform.position;
             // AABB 使用 HalfSize (半径)
-            Bounds = new AABB(Position, m_Box2d.size * 0.5f);
+            m_Bounds = new AABB(m_Position, m_Box2d.size * 0.5f);
         }
 
         protected override void OnDespawn()
         {
-            Global.gApp.gEntityMgr.OnDespawn(m_EntityHandle);
+            Global.gApp.gEntityMgr.OnDespawn(this);
         }
         
         public void SetParent(Transform go)
@@ -54,18 +53,28 @@ namespace Game.Runtime.Hotfix
             m_Type = type;
         }
 
-        public void SetHandle(EntityHandle handle)
+        public void OnSetPosition(Vector3 pos)
         {
-            m_EntityHandle = handle;
+            m_Position = pos;
         }
-        
+
+        public void OnSetRotation(Vector3 eulerAngle)
+        {
+            transform.localRotation = Quaternion.Euler(eulerAngle);
+        }
+
+        public void OnSetScale(Vector3 scale)
+        {
+            transform.localScale = scale;
+        }
+
         public void OnIUpdate(float dt)
         {
             if (gameObject.transform != null)
             {
-                gameObject.transform.position = Position;
+                gameObject.transform.localPosition = m_Position;
                 // 同步 AABB 中心点
-                Bounds.Update(Position, Bounds.HalfSize);
+                m_Bounds.Update(m_Position, m_Bounds.HalfSize);
             }
         }
     }
