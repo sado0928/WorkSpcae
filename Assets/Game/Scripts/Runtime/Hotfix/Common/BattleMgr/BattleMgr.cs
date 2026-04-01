@@ -72,10 +72,11 @@ namespace Game.Runtime.Hotfix
             if (!m_IsStarted) return;
             // 1. 重建四叉树
             m_Quadtree.Clear();
-            foreach (var entity in Global.gApp.gEntityMgr.m_EntityList)
+            Global.gApp.gEntityMgr.m_EntityList.Foreach(entity =>
             {
                 m_Quadtree.Insert(entity);
-            }
+            });
+            
             m_RoundTimer += dt;
             if (m_RoundTimer >= m_RoundStep)
             {
@@ -147,7 +148,7 @@ namespace Game.Runtime.Hotfix
             if (hero == null) return;
             
             var entities = Global.gApp.gEntityMgr.m_EntityList;
-            foreach (var entity in entities)
+            entities.Foreach(entity =>
             {
                 if (entity is EntityMonster monsterEntity)
                 {
@@ -160,6 +161,7 @@ namespace Game.Runtime.Hotfix
                     // 查询半径设为 SEPARATION_RADIUS
                     m_Quadtree.Query(new AABB(monsterEntity.m_Position, new Vector2(SEPARATION_RADIUS, SEPARATION_RADIUS)), m_QueryResult);
                 
+                    float sqrSeparationRadius = SEPARATION_RADIUS * SEPARATION_RADIUS; // 预计算平方
                     foreach (var neighbor in m_QueryResult)
                     {
                         if (neighbor == monsterEntity) continue;
@@ -185,7 +187,7 @@ namespace Game.Runtime.Hotfix
                     }
                     monsterEntity.m_Position += combinedDir * monsterEntity.Speed * dt;
                 }
-            }
+            });
         }
 
         public void OnDestroy()
