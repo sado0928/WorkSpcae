@@ -29,20 +29,13 @@ namespace Game.Runtime.Hotfix
         /// <returns></returns>
         public EntityHandle<T> CreateEntity<T>(string assetPath,EntityType type,Transform parent = null) where T : EntityBase
         {
-            // 套壳
-            GameObject go = new GameObject();
-            long sInstanceID = go.GetInstanceID();
-            go.name = System.IO.Path.GetFileName(assetPath) + "_" + sInstanceID;
             
             EntityHandle<T> handle = new EntityHandle<T>();
             Global.gApp.gPoolMgr.Spawn<T>(assetPath).SetCallback((entityBase) =>
             {
-                // 壳子节点
-                go.transform.SetParent(parent ?? m_EntityRoot, false);
+                long sInstanceID = entityBase.GetInstanceID();
                 // 实体节点
-                entityBase.transform.SetParent(go.transform);
-                
-                entityBase.SetParent(go.transform);
+                entityBase.transform.SetParent(parent ?? m_EntityRoot, false);
                 entityBase.SetEntityId(sInstanceID);
                 entityBase.SetEntityType(type);
                 m_EntityDic.Add(sInstanceID,entityBase);
@@ -69,7 +62,6 @@ namespace Game.Runtime.Hotfix
             {
                 m_EntityList.Remove(entity);
                 m_EntityDic.Remove(entity.m_EntityId);
-                Global.gApp.gResMgr.Destroy(entity.m_Parent?.gameObject);
             }
         }
         

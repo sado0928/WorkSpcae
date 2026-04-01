@@ -7,8 +7,6 @@ namespace Game.Runtime.Hotfix
     /// </summary>
     public class EntityBase :PoolBase,IQuadtreeItem,IUpdate
     {
-        // 壳子（Transform相关的应该使用local API
-        public Transform m_Parent { get;private set; }
         // 实体id
         public long m_EntityId { get;private set; }
         // 实体类型
@@ -38,11 +36,6 @@ namespace Game.Runtime.Hotfix
             Global.gApp.gEntityMgr.OnDespawn(this);
         }
         
-        public void SetParent(Transform go)
-        {
-            m_Parent = go;
-        }
-
         public void SetEntityId(long id)
         {
             m_EntityId = id;
