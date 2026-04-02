@@ -152,6 +152,12 @@ namespace Game.Runtime.Hotfix
             {
                 if (entity is EntityMonster monsterEntity)
                 {
+                    // 1. 获取动态半径 (基于 AABB)
+                    float myRadius = Mathf.Max(monsterEntity.m_Bounds.HalfSize.x, monsterEntity.m_Bounds.HalfSize.y);
+                    if (myRadius <= 0) myRadius = 0.5f; 
+                    
+                    float perceptionRadius = myRadius * 2.5f; 
+
                     // A. 追踪力：朝向英雄
                     Vector2 chaseDir = (hero.m_Position - monsterEntity.m_Position).normalized;
                 
@@ -159,9 +165,8 @@ namespace Game.Runtime.Hotfix
                     Vector2 separationForce = Vector2.zero;
                     m_QueryResult.Clear();
                     // 查询半径设为 SEPARATION_RADIUS
-                    m_Quadtree.Query(new AABB(monsterEntity.m_Position, new Vector2(SEPARATION_RADIUS, SEPARATION_RADIUS)), m_QueryResult);
+                    m_Quadtree.Query(new AABB(monsterEntity.m_Position, new Vector2(perceptionRadius, perceptionRadius)), m_QueryResult);
                 
-                    float sqrSeparationRadius = SEPARATION_RADIUS * SEPARATION_RADIUS; // 预计算平方
                     foreach (var neighbor in m_QueryResult)
                     {
                         if (neighbor == monsterEntity) continue;
@@ -169,10 +174,10 @@ namespace Game.Runtime.Hotfix
                         Vector2 diff = monsterEntity.m_Position - neighbor.m_Position;
                         float dist = diff.magnitude;
                     
-                        if (dist < SEPARATION_RADIUS && dist > 0.001f)
+                        if (dist < perceptionRadius && dist > 0.001f)
                         {
                             // 离得越近，推力越强 (1/dist)
-                            separationForce += diff.normalized * (SEPARATION_RADIUS / dist);
+                            separationForce += diff.normalized * (perceptionRadius / dist);
                         }
                     }
             
