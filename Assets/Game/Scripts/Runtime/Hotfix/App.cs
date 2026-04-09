@@ -21,6 +21,8 @@ namespace Game.Runtime.Hotfix
         public BattleMgr gBattleMgr { get; private set; }
         public EntityMgr gEntityMgr { get; private set; }
         public ProcedureMgr gProcedureMgr { get; private set; }
+        public TileMapMgr gTileMapMgr { get; private set; }
+        public RandomMapMgr gRandomMapMgr { get; private set; }
 
         public void OnAwake(Global global)
         {
@@ -45,6 +47,8 @@ namespace Game.Runtime.Hotfix
             gUIMgr = new UIMgr();
             gBattleMgr = new BattleMgr();
             gEntityMgr = new EntityMgr();
+            gTileMapMgr = new TileMapMgr();
+            gRandomMapMgr = new RandomMapMgr();
 
             // 初始化流程管理器
             gProcedureMgr = new ProcedureMgr();

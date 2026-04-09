@@ -7,7 +7,14 @@ namespace Game.Runtime.Hotfix
         public override void OnEnter()
         {
             Global.gApp.gBattleMgr.m_WorldCamera.gameObject.SetActive(true);
-            Global.gApp.gBattleMgr.OnStartBattle();
+            //生成大地图
+            Global.gApp.gRandomMapMgr.Generate(100, 100, 25,1);
+            //初始化 47 个连续命名的瓦片
+            Global.gApp.gTileMapMgr.InitBlobTiles("TileMap/level");
+            //渲染屏幕范围
+            Global.gApp.gTileMapMgr.RenderRandomMap(0, 0, 100, 100);
+
+            // Global.gApp.gBattleMgr.OnStartBattle();
             Global.gApp.gDispatcherMgr.Dispatch(EventDefine.LoadingFinish, true);
         }
 

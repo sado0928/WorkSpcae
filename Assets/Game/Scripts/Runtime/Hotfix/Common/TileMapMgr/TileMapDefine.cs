@@ -5,7 +5,7 @@ namespace Game.Runtime.Hotfix
     
     public enum MapObjectType {
         Space = 0,
-        Build = 1,
+        Wall = 1,
     }
     
     [System.Serializable]

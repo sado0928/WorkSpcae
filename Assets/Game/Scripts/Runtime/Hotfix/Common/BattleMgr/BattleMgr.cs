@@ -59,7 +59,7 @@ namespace Game.Runtime.Hotfix
         public void OnStopBattle()
         {
             m_IsStarted = false;
-            m_Quadtree.Clear();
+            m_Quadtree = null;
             foreach (KeyValuePair<long, EntityBase> pair in m_BattleEntityDic)
             {
                 Global.gApp.gEntityMgr.Dispose(pair.Value);
