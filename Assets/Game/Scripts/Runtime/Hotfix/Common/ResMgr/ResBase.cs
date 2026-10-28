@@ -17,7 +17,10 @@ namespace Game.Runtime.Hotfix
         protected string m_Language = "zh_CN";
 
         // 动态资源追踪表：记录本对象生命周期内通过该脚本加载的所有资源路径
-        private Dictionary<string, ResType> m_LoadedAssets = new Dictionary<string, ResType>();
+        private Dictionary<string, object> m_LoadedAssets = new Dictionary<string, object>();
+        private readonly Dictionary<string, Action> m_ReleaseActions = new Dictionary<string, Action>();
+        private readonly Dictionary<string, List<Action<UnityEngine.Object>>> m_LoadingAssets = new Dictionary<string, List<Action<UnityEngine.Object>>>();
+        private bool m_ResourcesDestroyed;
         
         // 托管特效列表：UI 销毁时自动回收关联特效 key => instanceID
         private Dictionary<int,EffectBase> m_EffectDic = new Dictionary<int,EffectBase>();
@@ -102,8 +105,7 @@ namespace Game.Runtime.Hotfix
         {
             if (image == null || string.IsNullOrEmpty(path)) return;
 
-            RecordAsset(path, ResType.Sprite);
-            Global.gApp.gResMgr.LoadSpriteAsync(path, (sprite) =>
+            LoadResourceAsync<Sprite>(path, ResType.Sprite, (sprite) =>
             {
                 // 异步回调安全检查：确保 Image 对象在加载回来时还没被销毁
                 if (image != null && sprite != null)
@@ -120,8 +122,8 @@ namespace Game.Runtime.Hotfix
         {
             if (rawImage == null || string.IsNullOrEmpty(path)) return;
 
-            RecordAsset(path, ResType.Asset); // Texture 通常作为普通 Asset 处理或扩展 ResType
-            Global.gApp.gResMgr.LoadAssetAsync<Texture2D>(path, ResType.Asset, (tex) =>
+            // Texture 通常作为普通 Asset 处理或扩展 ResType
+            LoadResourceAsync<Texture2D>(path, ResType.Asset, (tex) =>
             {
                 if (rawImage != null && tex != null)
                 {
@@ -137,8 +139,7 @@ namespace Game.Runtime.Hotfix
         {
             if (renderer == null || string.IsNullOrEmpty(path)) return;
 
-            RecordAsset(path, ResType.Material);
-            Global.gApp.gResMgr.LoadMaterialAsync(path, (mat) =>
+            LoadResourceAsync<Material>(path, ResType.Material, (mat) =>
             {
                 if (renderer != null && mat != null)
                 {
@@ -171,13 +172,53 @@ namespace Game.Runtime.Hotfix
 
         #region 内部管理与自动释放
 
-        private void RecordAsset(string path, ResType type)
+        private void RecordAsset(string path, object asset)
         {
             if (string.IsNullOrEmpty(path)) return;
             if (!m_LoadedAssets.ContainsKey(path))
             {
-                m_LoadedAssets.Add(path, type);
+                m_LoadedAssets.Add(path, asset);
             }
+        }
+
+        private void LoadResourceAsync<T>(string path, ResType type, Action<T> callback, bool forceGlobal) where T : UnityEngine.Object
+        {
+            if (m_ResourcesDestroyed) return;
+            if (m_LoadedAssets.TryGetValue(path, out var existing))
+            {
+                // 同一对象再次使用资源，直接返回已加载实例，不重复增加 ResMgr 引用计数。
+                callback(existing as T);
+                return;
+            }
+            if (m_LoadingAssets.TryGetValue(path, out var waiting))
+            {
+                // 首次请求还未完成时也合并请求，避免连续调用造成多次计数。
+                waiting.Add(asset => callback(asset as T));
+                return;
+            }
+            waiting = new List<Action<UnityEngine.Object>> { asset => callback(asset as T) };
+            m_LoadingAssets.Add(path, waiting);
+            Global.gApp.gResMgr.LoadAssetTrackedAsync<T>(path, type, (asset, release) =>
+            {
+                m_LoadingAssets.Remove(path);
+                if (m_ResourcesDestroyed || this == null)
+                {
+                    // UI 已销毁才完成加载：立即归还本次成功加载的引用。
+                    release?.Invoke();
+                    return;
+                }
+                if (asset != null)
+                {
+                    RecordAsset(path, asset);
+                    m_ReleaseActions[path] = release;
+                }
+                foreach (var done in waiting)
+                {
+                    if (m_ResourcesDestroyed) break;
+                    try { done(asset); }
+                    catch (Exception e) { Debug.LogException(e); }
+                }
+            }, forceGlobal);
         }
 
         private void ReleaseAssets()
@@ -186,10 +227,12 @@ namespace Game.Runtime.Hotfix
 
             foreach (var kv in m_LoadedAssets)
             {
-                Global.gApp.gResMgr.UnloadAsset(kv.Key);
+                // 归还时使用加载时记录的域，Global 共享资源不会减错到当前场景。
+                m_ReleaseActions[kv.Key]?.Invoke();
             }
 
             m_LoadedAssets.Clear();
+            m_ReleaseActions.Clear();
         }
         
         private void DisposeEffect()
@@ -210,6 +253,8 @@ namespace Game.Runtime.Hotfix
         }
         protected virtual void OnDestroy()
         {
+            m_ResourcesDestroyed = true;
+            m_LoadingAssets.Clear();
             ReleaseAssets();
             DisposeEffect();
         }
