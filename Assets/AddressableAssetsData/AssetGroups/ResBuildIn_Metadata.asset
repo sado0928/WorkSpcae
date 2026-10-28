@@ -59,6 +59,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - default
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86cff3afabee5ea42a1a6a0d9485dbe9
+    m_Address: Metadata/UnityEngine.JSONSerializeModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c600ed52defe424c92864ac8110ee47
     m_Address: Metadata/UnityEngine.ParticleSystemModule.dll.bytes
     m_ReadOnly: 0
@@ -73,6 +79,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9fe5a4c813e567e4d80339ef22342629
     m_Address: Metadata/UnityEngine.InputLegacyModule.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a0174f089d933ee42bb38e04a85fb0fc
+    m_Address: Metadata/UnityEngine.GridModule.dll.bytes
     m_ReadOnly: 0
     m_SerializedLabels:
     - default
@@ -103,6 +115,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e6455937b39b69b418b02145b02d6bac
     m_Address: Metadata/UnityEngine.UI.dll.bytes
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - default
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f610cdfb7a4ed7348af8b00fe0ed3374
+    m_Address: Metadata/UnityEngine.TilemapModule.dll.bytes
     m_ReadOnly: 0
     m_SerializedLabels:
     - default

@@ -10,10 +10,13 @@
   <assembly fullname="Unity.ResourceManager" preserve="all" />
   <assembly fullname="UnityEngine.AnimationModule" preserve="all" />
   <assembly fullname="UnityEngine.AudioModule" preserve="all" />
+  <assembly fullname="UnityEngine.GridModule" preserve="all" />
   <assembly fullname="UnityEngine.InputLegacyModule" preserve="all" />
+  <assembly fullname="UnityEngine.JSONSerializeModule" preserve="all" />
   <assembly fullname="UnityEngine.ParticleSystemModule" preserve="all" />
   <assembly fullname="UnityEngine.Physics2DModule" preserve="all" />
   <assembly fullname="UnityEngine.TextRenderingModule" preserve="all" />
+  <assembly fullname="UnityEngine.TilemapModule" preserve="all" />
   <assembly fullname="UnityEngine.UI" preserve="all" />
   <assembly fullname="UnityEngine.UIModule" preserve="all" />
 </linker>
