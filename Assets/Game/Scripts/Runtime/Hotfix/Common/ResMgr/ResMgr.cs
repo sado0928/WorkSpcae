@@ -24,11 +24,6 @@ namespace Game.Runtime.Hotfix
         // Key2: 资源路径 (Addressable Name/Path)
         // Value: 资源对象 (UnityEngine.Object)
         private Dictionary<ResTypeByScene, Dictionary<string, UnityEngine.Object>> m_CacheDic;
-        // 业务引用计数与 Addressables 句柄分开：同域同路径只保留一个加载句柄。
-        private readonly Dictionary<ResTypeByScene, Dictionary<string, int>> m_RefCounts = new Dictionary<ResTypeByScene, Dictionary<string, int>>();
-        private readonly Dictionary<ResTypeByScene, Dictionary<string, AsyncOperationHandle>> m_Handles = new Dictionary<ResTypeByScene, Dictionary<string, AsyncOperationHandle>>();
-        private readonly Dictionary<ResTypeByScene, int> m_ScopeVersions = new Dictionary<ResTypeByScene, int>();
-        private bool m_Destroyed;
 
         /// <summary>
         /// 当前资源加载所属的场景域
@@ -55,18 +50,12 @@ namespace Game.Runtime.Hotfix
             foreach (ResTypeByScene type in Enum.GetValues(typeof(ResTypeByScene)))
             {
                 m_CacheDic[type] = new Dictionary<string, UnityEngine.Object>();
-                m_RefCounts[type] = new Dictionary<string, int>();
-                m_Handles[type] = new Dictionary<string, AsyncOperationHandle>();
-                m_ScopeVersions[type] = 0;
             }
         }
 
         
         public virtual void OnDestroy()
         {
-            if (m_Destroyed) return;
-            m_Destroyed = true;
-            ClearAll();
             UnLoadAssets();
         }
         
@@ -87,17 +76,14 @@ namespace Game.Runtime.Hotfix
         /// <returns></returns>
         public T LoadAsset<T>(string path, ResType resType, bool forceGlobal = false) where T : UnityEngine.Object
         {
-            if (m_Destroyed) return null;
             // 确定目标缓存域：如果强制Global，则存入Global，否则存入当前场景域
             ResTypeByScene targetScope = forceGlobal ? ResTypeByScene.Global : CurrentTypeBySceneType;
-            int scopeVersion = m_ScopeVersions[targetScope];
 
             // 1. 检查目标域缓存
             if (m_CacheDic[targetScope].TryGetValue(path, out UnityEngine.Object cachedObj))
             {
-                if (cachedObj is T result) { m_RefCounts[targetScope][path]++; return result; }
+                if (cachedObj is T result) return result;
                 Debug.LogWarning($"[ResMgr] Path {path} cached but type mismatch. Expected {typeof(T)}, got {cachedObj?.GetType()}");
-                return null;
             }
 
             // 2. 如果目标域不是 Global，尝试去 Global 域找一下（防止重复加载通用资源）
@@ -106,9 +92,7 @@ namespace Game.Runtime.Hotfix
                 if (m_CacheDic[ResTypeByScene.Global].TryGetValue(path, out UnityEngine.Object globalObj))
                 {
                     // 找到了，直接返回，不移动所有权，它仍然属于 Global
-                    if (!(globalObj is T globalResult)) return null;
-                    m_RefCounts[ResTypeByScene.Global][path]++;
-                    return globalResult;
+                    return globalObj as T;
                 }
             }
 
@@ -116,31 +100,15 @@ namespace Game.Runtime.Hotfix
             string address = GetAddress(path, resType);
             var op = Addressables.LoadAssetAsync<T>(address);
             T asset = op.WaitForCompletion();
-            if (m_Destroyed || scopeVersion != m_ScopeVersions[targetScope])
-            {
-                Addressables.Release(op);
-                return null;
-            }
 
             // 4. 存入缓存
             if (op.Status == AsyncOperationStatus.Succeeded && asset != null)
             {
-                // 同步等待可能驱动其他请求完成，已有缓存时仅增加业务计数。
-                if (m_CacheDic[targetScope].TryGetValue(path, out var existing))
-                {
-                    Addressables.Release(op);
-                    if (!(existing is T existingResult)) return null;
-                    m_RefCounts[targetScope][path]++;
-                    return existingResult;
-                }
                 m_CacheDic[targetScope][path] = asset;
-                m_RefCounts[targetScope][path] = 1;
-                m_Handles[targetScope][path] = op;
                 return asset;
             }
             
             Debug.LogError($"[ResMgr] Load failed: {address}");
-            Addressables.Release(op);
             return null;
         }
 
@@ -150,29 +118,17 @@ namespace Game.Runtime.Hotfix
         public void LoadAssetAsync<T>(string path, ResType resType, Action<T> callback, bool forceGlobal = false) where T : UnityEngine.Object
         {
             if (callback == null) return;
-            LoadAssetTrackedAsync<T>(path, resType, (asset, release) => callback(asset), forceGlobal);
-        }
-
-        // ResBase 使用配对的归还操作，记录真实归属域，避免切场景后减错计数。
-        internal void LoadAssetTrackedAsync<T>(string path, ResType resType, Action<T, Action> callback, bool forceGlobal = false) where T : UnityEngine.Object
-        {
-            if (m_Destroyed) { callback(null, null); return; }
 
             ResTypeByScene targetScope = forceGlobal ? ResTypeByScene.Global : CurrentTypeBySceneType;
-            int scopeVersion = m_ScopeVersions[targetScope];
 
             // 1. 检查目标域缓存
             if (m_CacheDic[targetScope].TryGetValue(path, out UnityEngine.Object cachedObj))
             {
                 if (cachedObj is T result)
                 {
-                    m_RefCounts[targetScope][path]++;
-                    callback(result, CreateRelease(path, targetScope, result));
+                    callback(result);
                     return;
                 }
-                Debug.LogError($"[ResMgr] Path {path} cached but type mismatch: {typeof(T)}");
-                callback(null, null);
-                return;
             }
 
             // 2. 检查 Global 域缓存
@@ -180,12 +136,7 @@ namespace Game.Runtime.Hotfix
             {
                 if (m_CacheDic[ResTypeByScene.Global].TryGetValue(path, out UnityEngine.Object globalObj))
                 {
-                    if (globalObj is T globalResult)
-                    {
-                        m_RefCounts[ResTypeByScene.Global][path]++;
-                        callback(globalResult, CreateRelease(path, ResTypeByScene.Global, globalResult));
-                    }
-                    else callback(null, null);
+                    callback(globalObj as T);
                     return;
                 }
             }
@@ -194,37 +145,24 @@ namespace Game.Runtime.Hotfix
             string address = GetAddress(path, resType);
             Addressables.LoadAssetAsync<T>(address).Completed += (op) =>
             {
-                if (m_Destroyed || scopeVersion != m_ScopeVersions[targetScope])
-                {
-                    Addressables.Release(op);
-                    callback(null, null);
-                    return;
-                }
                 if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null)
                 {
-                    T asset = op.Result;
                     // 放入目标域缓存（由于是异步，需再次判断防止并发冲突）
                     if (!m_CacheDic[targetScope].ContainsKey(path))
                     {
                         m_CacheDic[targetScope][path] = op.Result;
-                        m_RefCounts[targetScope][path] = 1;
-                        m_Handles[targetScope][path] = op;
                     }
                     else
                     {
                         // 必须释放掉本次加载产生的引用，否则会导致 Addressables 引用计数泄露，资源永远无法卸载。
-                        Addressables.Release(op);
-                        if (!(m_CacheDic[targetScope][path] is T cachedResult)) { callback(null, null); return; }
-                        asset = cachedResult;
-                        m_RefCounts[targetScope][path]++;
+                        Addressables.Release(op.Result);
                     }
-                    callback(asset, CreateRelease(path, targetScope, asset));
+                    callback(op.Result);
                 }
                 else
                 {
                     Debug.LogError($"[ResMgr] Async Load failed: {address}");
-                    Addressables.Release(op);
-                    callback(null, null);
+                    callback(null);
                 }
             };
         }
@@ -262,30 +200,12 @@ namespace Game.Runtime.Hotfix
         {
             if (m_CacheDic[scope].TryGetValue(path, out UnityEngine.Object obj))
             {
-                int remaining = --m_RefCounts[scope][path];
-                if (remaining > 0) return true;
-                m_RefCounts[scope].Remove(path);
+                if (obj != null) Addressables.Release(obj);
                 m_CacheDic[scope].Remove(path);
-                var handle = m_Handles[scope][path];
-                m_Handles[scope].Remove(path);
-                Addressables.Release(handle);
-                Global.LogEditor($"卸载资源{obj?.name}");
+                Global.LogEditor($"卸载资源{obj.name}");
                 return true;
             }
             return false;
-        }
-
-        private Action CreateRelease(string path, ResTypeByScene scope, UnityEngine.Object asset)
-        {
-            int version = m_ScopeVersions[scope];
-            bool released = false;
-            return () =>
-            {
-                if (released) return;
-                released = true;
-                if (version == m_ScopeVersions[scope] && m_CacheDic[scope].TryGetValue(path, out var current) && ReferenceEquals(current, asset))
-                    UnloadAssetFromScope(path, scope);
-            };
         }
 
         /// <summary>
@@ -323,8 +243,6 @@ namespace Game.Runtime.Hotfix
         /// </summary>
         public void ClearSceneRes(ResTypeByScene typeBySceneType)
         {
-            // 场景域销毁属于强制清理：旧请求和旧持有者之后不能影响新一轮计数。
-            m_ScopeVersions[typeBySceneType]++;
             if (typeBySceneType == ResTypeByScene.Global)
             {
                 Debug.LogWarning("[ResMgr] Warning: Clearing Global cache! Make sure this is intended (e.g. Reboot).");
@@ -338,15 +256,13 @@ namespace Game.Runtime.Hotfix
                 foreach (var key in keys)
                 {
                     var obj = subDic[key];
-                    if (m_Handles[typeBySceneType].TryGetValue(key, out var handle))
+                    if (obj != null)
                     {
-                        Addressables.Release(handle);
+                        Addressables.Release(obj);
                         count++;
                     }
                 }
                 subDic.Clear();
-                m_Handles[typeBySceneType].Clear();
-                m_RefCounts[typeBySceneType].Clear();
                 Debug.Log($"[ResMgr] Cleared cache for scope [{typeBySceneType}]. Released {count} assets.");
             }
         }
